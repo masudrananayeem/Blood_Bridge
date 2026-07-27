@@ -21,17 +21,18 @@ export default function LoginPage() {
     formState: { errors },
   } = useForm();
 
-  const redirectAfterLogin = () => {
-    const from = location.state?.from?.pathname || "/dashboard";
-    navigate(from, { replace: true });
+  const redirectAfterLogin = (profile) => {
+    const from = location.state?.from?.pathname;
+    if (from) return navigate(from, { replace: true });
+    navigate(profile?.role === "admin" ? "/admin" : "/dashboard", { replace: true });
   };
 
   const onSubmit = async (formData) => {
     setSubmitting(true);
     try {
-      await loginWithEmail(formData.email, formData.password);
+      const profile = await loginWithEmail(formData.email, formData.password);
       toast.success("সফলভাবে লগইন হয়েছে!");
-      redirectAfterLogin();
+      redirectAfterLogin(profile);
     } catch (err) {
       toast.error(getErrorMessage(err));
     } finally {
@@ -42,9 +43,9 @@ export default function LoginPage() {
   const handleGoogleLogin = async () => {
     setGoogleLoading(true);
     try {
-      await loginWithGoogle();
+      const profile = await loginWithGoogle();
       toast.success("সফলভাবে লগইন হয়েছে!");
-      redirectAfterLogin();
+      redirectAfterLogin(profile);
     } catch (err) {
       toast.error(getErrorMessage(err));
     } finally {
