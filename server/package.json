@@ -6,7 +6,9 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "make-admin": "node scripts/makeAdmin.js"
+    "make-admin": "node scripts/makeAdmin.js",
+    "remove-admin": "node scripts/removeAdmin.js",
+    "cleanup-users": "node scripts/cleanupOrphanedUsers.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
