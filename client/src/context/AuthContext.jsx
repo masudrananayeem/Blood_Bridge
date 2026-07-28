@@ -74,6 +74,13 @@ export default function AuthProvider({ children }) {
 
   const resetPassword = (email) => sendPasswordResetEmail(auth, email);
 
+  // Used by the "check your email" screen right after registration, in
+  // case the first verification email got lost or landed in spam.
+  const resendVerificationEmail = () => {
+    if (!auth.currentUser) throw new Error("No signed-in Firebase user to resend a verification email to");
+    return sendEmailVerification(auth.currentUser);
+  };
+
   const logout = async () => {
     await signOut(auth);
     localStorage.removeItem("bb-token");
@@ -90,6 +97,7 @@ export default function AuthProvider({ children }) {
     loginWithEmail,
     loginWithGoogle,
     resetPassword,
+    resendVerificationEmail,
     logout,
     syncWithBackend,
   };
