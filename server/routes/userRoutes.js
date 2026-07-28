@@ -5,6 +5,7 @@ import {
   toggleAvailability,
   switchMode,
   getDonationHistory,
+  recordDonation,
   searchDonors,
   toggleSavedDonor,
   getSavedDonors,
@@ -19,6 +20,7 @@ router.put("/profile", updateProfile);
 router.patch("/availability", toggleAvailability);
 router.patch("/mode", switchMode);
 router.get("/donation-history", getDonationHistory);
+router.post("/record-donation", recordDonation);
 router.get("/search-donors", searchDonors);
 router.get("/saved-donors", getSavedDonors);
 router.patch("/saved-donors/:donorId", toggleSavedDonor);
