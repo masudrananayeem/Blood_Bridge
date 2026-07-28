@@ -166,6 +166,11 @@ export default function SearchDonor() {
                   {d.distanceKm === 0 ? "একই জেলা" : `~${d.distanceKm} km`}
                 </span>
               )}
+              {d.daysUntilEligible > 0 && (
+                <span className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-600 dark:bg-amber-950/40">
+                  🩸 আবার Available: {d.daysUntilEligible} দিন পর
+                </span>
+              )}
             </div>
             <p className="mb-1 flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
               <FiMapPin size={12} /> {d.upazila}, {d.district}

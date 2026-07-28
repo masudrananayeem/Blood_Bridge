@@ -1,9 +1,16 @@
 import { Link } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext.jsx";
 
 export default function Logo({ variant = "default" }) {
   const isLight = variant === "light";
+  // Logged in? Take them back to their own dashboard (or admin panel),
+  // not the public marketing homepage — landing there looked like they'd
+  // been logged out, since it only shows a "Login" button.
+  const { user } = useAuth();
+  const destination = user ? (user.role === "admin" ? "/admin" : "/dashboard") : "/";
+
   return (
-    <Link to="/" className="flex items-center gap-2 group">
+    <Link to={destination} className="flex items-center gap-2 group">
       <svg
         width="34"
         height="34"

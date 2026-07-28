@@ -83,13 +83,26 @@ export default function IncomingRequests() {
               </div>
             </div>
 
-            <div className="mb-4 flex flex-wrap items-center gap-3 text-sm text-gray-600 dark:text-gray-300">
-              <span className="rounded-full bg-brand-50 px-2.5 py-1 font-semibold text-brand-700 dark:bg-brand-950/50 dark:text-brand-300">
-                {r.bloodGroup} · {r.units} unit(s)
-              </span>
-              <span className="flex items-center gap-1">
-                <FiMapPin size={14} /> {r.hospital}, {r.upazila}, {r.district}
-              </span>
+            <div className="mb-4 grid grid-cols-1 gap-x-4 gap-y-2 rounded-xl bg-gray-50 p-3 text-sm sm:grid-cols-2 dark:bg-white/5">
+              <p className="text-gray-600 dark:text-gray-300">
+                <span className="font-semibold text-gray-800 dark:text-gray-100">Blood Group:</span> {r.bloodGroup}
+              </p>
+              <p className="text-gray-600 dark:text-gray-300">
+                <span className="font-semibold text-gray-800 dark:text-gray-100">Units Needed:</span> {r.units}
+              </p>
+              <p className="text-gray-600 dark:text-gray-300">
+                <span className="font-semibold text-gray-800 dark:text-gray-100">Hospital Name:</span> {r.hospital}
+              </p>
+              <p className="flex items-center gap-1 text-gray-600 dark:text-gray-300">
+                <span className="font-semibold text-gray-800 dark:text-gray-100">Place:</span>
+                <FiMapPin size={12} className="shrink-0" /> {r.upazila}, {r.district}
+              </p>
+              {r.neededByDate && (
+                <p className="text-gray-600 dark:text-gray-300 sm:col-span-2">
+                  <span className="font-semibold text-gray-800 dark:text-gray-100">Needed By:</span>{" "}
+                  {new Date(r.neededByDate).toLocaleDateString()}
+                </p>
+              )}
             </div>
 
             {r.message && (

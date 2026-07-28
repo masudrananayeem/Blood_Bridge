@@ -64,9 +64,24 @@ export default function SavedDonorsList() {
             </div>
           </div>
 
-          <span className="mb-2 inline-block rounded-full bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-700 dark:bg-brand-950/50 dark:text-brand-300">
-            {d.bloodGroup}
-          </span>
+          <div className="mb-2 flex flex-wrap items-center gap-2">
+            <span className="inline-block rounded-full bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-700 dark:bg-brand-950/50 dark:text-brand-300">
+              {d.bloodGroup}
+            </span>
+            {d.daysUntilEligible > 0 ? (
+              <span className="inline-block rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-600 dark:bg-amber-950/40">
+                🩸 আবার Available: {d.daysUntilEligible} দিন পর
+              </span>
+            ) : !d.isAvailable ? (
+              <span className="inline-block rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-500 dark:bg-white/10">
+                Unavailable
+              </span>
+            ) : (
+              <span className="inline-block rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-600 dark:bg-emerald-950/40">
+                Available
+              </span>
+            )}
+          </div>
           <p className="mb-4 text-xs text-gray-400">
             {d.phone} {d.email ? `· ${d.email}` : ""}
           </p>
@@ -80,7 +95,9 @@ export default function SavedDonorsList() {
             </button>
             <button
               onClick={() => setRequestingDonor(d)}
-              className="flex flex-1 items-center justify-center gap-2 rounded-full bg-brand-gradient py-2 text-xs font-semibold text-white"
+              disabled={!d.isAvailable}
+              title={!d.isAvailable ? "এই ডোনার এই মুহূর্তে Unavailable" : ""}
+              className="flex flex-1 items-center justify-center gap-2 rounded-full bg-brand-gradient py-2 text-xs font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40"
             >
               <FiSend size={14} /> Request
             </button>
