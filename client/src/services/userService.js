@@ -20,6 +20,11 @@ export const getDonationHistory = async () => {
   return data;
 };
 
+export const recordDonation = async (payload = {}) => {
+  const { data } = await axiosInstance.post("/users/record-donation", payload);
+  return data;
+};
+
 export const searchDonors = async (filters) => {
   const { data } = await axiosInstance.get("/users/search-donors", { params: filters });
   return data;
