@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import { FiLoader, FiUpload } from "react-icons/fi";
+import { FiLoader, FiUpload, FiMail, FiAlertTriangle } from "react-icons/fi";
 import AuthLayout from "../../components/auth/AuthLayout.jsx";
 import FormInput from "../../components/auth/FormInput.jsx";
 import { useAuth } from "../../context/AuthContext.jsx";
@@ -14,11 +14,13 @@ import districts from "../../utils/districts.js";
 const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 
 export default function RegisterPage() {
-  const { registerWithEmail } = useAuth();
+  const { registerWithEmail, resendVerificationEmail } = useAuth();
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
   const [preview, setPreview] = useState(null);
   const [photoFile, setPhotoFile] = useState(null);
+  const [registeredEmail, setRegisteredEmail] = useState(null);
+  const [resending, setResending] = useState(false);
 
   const {
     register,
@@ -28,6 +30,18 @@ export default function RegisterPage() {
   } = useForm();
 
   const password = watch("password");
+
+  const handleResend = async () => {
+    setResending(true);
+    try {
+      await resendVerificationEmail();
+      toast.success("ভেরিফিকেশন ইমেইল আবার পাঠানো হয়েছে — Inbox ও Spam/Junk ফোল্ডার দুটোই চেক করুন।");
+    } catch {
+      toast.error("ইমেইল পাঠানো যায়নি, একটু পর আবার চেষ্টা করুন।");
+    } finally {
+      setResending(false);
+    }
+  };
 
   const handlePhotoChange = (e) => {
     const file = e.target.files?.[0];
@@ -68,14 +82,47 @@ export default function RegisterPage() {
         photoURL,
       });
 
-      toast.success("অ্যাকাউন্ট তৈরি হয়েছে! ইমেইল ভেরিফাই করুন।");
-      navigate("/login");
+      toast.success("অ্যাকাউন্ট তৈরি হয়েছে!");
+      setRegisteredEmail(formData.email);
     } catch (err) {
       toast.error(mapFirebaseError(err.code) || "রেজিস্ট্রেশন ব্যর্থ হয়েছে, আবার চেষ্টা করুন।");
     } finally {
       setSubmitting(false);
     }
   };
+
+  if (registeredEmail) {
+    return (
+      <AuthLayout title="ইমেইল ভেরিফাই করুন" subtitle="একটা শেষ ধাপ বাকি">
+        <div className="flex flex-col items-center gap-4 text-center">
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-brand-50 text-brand-600 dark:bg-brand-950/40">
+            <FiMail size={26} />
+          </div>
+          <p className="text-gray-700 dark:text-gray-200">
+            <span className="font-semibold">{registeredEmail}</span> এ একটি ভেরিফিকেশন ইমেইল পাঠানো হয়েছে।
+            অ্যাকাউন্ট সম্পূর্ণ ব্যবহার করতে ইমেইলে থাকা লিংকে ক্লিক করে ভেরিফাই করুন।
+          </p>
+          <div className="flex w-full items-start gap-2 rounded-xl bg-amber-50 p-3 text-left text-sm text-amber-700 dark:bg-amber-950/30 dark:text-amber-400">
+            <FiAlertTriangle className="mt-0.5 shrink-0" size={16} />
+            <span>
+              ইমেইল খুঁজে না পেলে <b>Spam</b> বা <b>Junk</b> ফোল্ডার চেক করুন — মাঝে মাঝে ভেরিফিকেশন ইমেইল সেখানে চলে যায়।
+            </span>
+          </div>
+          <button
+            onClick={handleResend}
+            disabled={resending}
+            className="flex items-center gap-2 text-sm font-semibold text-brand-600 hover:underline disabled:opacity-50"
+          >
+            {resending ? <FiLoader className="animate-spin" size={14} /> : null}
+            ইমেইল আবার পাঠান
+          </button>
+          <button onClick={() => navigate("/login")} className="btn-primary mt-2 w-full justify-center">
+            লগইন পেজে যান
+          </button>
+        </div>
+      </AuthLayout>
+    );
+  }
 
   return (
     <AuthLayout title="অ্যাকাউন্ট তৈরি করুন" subtitle="একবার রেজিস্টার করে Donor ও Seeker — দুই ভূমিকাই ব্যবহার করুন">
