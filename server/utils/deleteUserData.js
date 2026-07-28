@@ -36,7 +36,14 @@ export const deleteUserCascade = async (admin, user) => {
 
   await Promise.all(deletions);
   await collections.users.doc(user.id).delete();
-  await admin.auth().deleteUser(user.firebaseUid);
+  try {
+    await admin.auth().deleteUser(user.firebaseUid);
+  } catch (err) {
+    // Already gone from Firebase Auth (e.g. removed directly via the
+    // Firebase console) — that's exactly the "ghost profile" case this
+    // cascade is meant to clean up, so it's fine to keep going.
+    if (err?.code !== "auth/user-not-found") throw err;
+  }
 };
 
 export default deleteUserCascade;
