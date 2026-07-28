@@ -5,7 +5,7 @@ export const getMyNotifications = async (req, res, next) => {
   try {
     const notifications = serializeDocs(
       await collections.notifications.where("recipientUid", "==", req.user.id).get()
-    );
+    ).sort((left, right) => new Date(right.createdAt || 0) - new Date(left.createdAt || 0));
     const unreadCount = notifications.filter((notification) => !notification.isRead).length;
 
     res.json({ success: true, notifications: notifications.slice(0, 50), unreadCount });

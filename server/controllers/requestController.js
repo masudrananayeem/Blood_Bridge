@@ -1,5 +1,6 @@
 import { collections, serializeDoc, serializeDocs, FieldValue, toTimestamp } from "../utils/firestore.js";
 import { distanceBetweenDistricts } from "../utils/districtCoords.js";
+import { isInCooldown, getDaysUntilEligible } from "../utils/donationEligibility.js";
 import notify from "../utils/notify.js";
 
 const loadUsers = async () => serializeDocs(await collections.users.get());
@@ -16,7 +17,15 @@ const sortRequests = (items) =>
   });
 
 const availableDonors = (users, seekerId) =>
-  users.filter((user) => user.id !== seekerId && user.role !== "admin" && user.activeMode === "donor" && user.isAvailable);
+  users.filter(
+    (user) =>
+      user.id !== seekerId &&
+      user.role !== "admin" &&
+      user.activeMode === "donor" &&
+      user.isAvailable &&
+      user.fullName &&
+      user.bloodGroup
+  );
 
 // @route  POST /api/requests
 // @desc   Create a blood request. Three modes, based on what the seeker sent:
@@ -49,13 +58,24 @@ export const createRequest = async (req, res, next) => {
 
     if (targetDonorUid) {
       resolvedTargetDonor = users.find((user) => user.id === targetDonorUid);
-      if (!resolvedTargetDonor || resolvedTargetDonor.role === "admin" || resolvedTargetDonor.activeMode !== "donor") {
+      if (
+        !resolvedTargetDonor ||
+        resolvedTargetDonor.role === "admin" ||
+        resolvedTargetDonor.activeMode !== "donor" ||
+        !resolvedTargetDonor.fullName
+      ) {
         res.status(404);
         throw new Error("Selected donor not found");
       }
       if (!resolvedTargetDonor.isAvailable) {
         res.status(409);
-        throw new Error("This donor is currently unavailable");
+        throw new Error(
+          isInCooldown(resolvedTargetDonor.lastDonationDate)
+            ? `এই ডোনার সম্প্রতি রক্ত দিয়েছেন — আরও ${getDaysUntilEligible(
+                resolvedTargetDonor.lastDonationDate
+              )} দিন পর আবার Available হবেন।`
+            : "This donor is currently unavailable"
+        );
       }
       notifiedDonorUids = [resolvedTargetDonor.id];
     } else if (isEmergency) {

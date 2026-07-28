@@ -170,6 +170,7 @@ export const updateRequestStatus = async (req, res, next) => {
       await Promise.all([
         collections.users.doc(request.acceptedDonorUid).update({
           lastDonationDate: FieldValue.serverTimestamp(),
+          isAvailable: false,
           updatedAt: FieldValue.serverTimestamp(),
         }),
         requestRef.update({

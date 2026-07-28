@@ -3,8 +3,17 @@ import { collections, serializeDoc, serializeDocs, FieldValue } from "../utils/f
 import { maskDonorContact } from "../utils/mask.js";
 import { distanceBetweenDistricts } from "../utils/districtCoords.js";
 import { deleteUserCascade } from "../utils/deleteUserData.js";
+import { getDaysUntilEligible, getNextEligibleDate, isInCooldown, DONATION_COOLDOWN_DAYS } from "../utils/donationEligibility.js";
 
 const loadUsers = async () => serializeDocs(await collections.users.get());
+
+// Guards against "ghost" entries showing up to seekers — e.g. a Firestore
+// profile left behind after its Firebase Auth account was removed outside
+// the app (deleted directly in the Firebase console), or a registration
+// that never finished writing all required fields. Such documents are
+// missing the basics a real donor profile always has.
+const isCompleteProfile = (user) =>
+  Boolean(user?.firebaseUid && user?.fullName?.trim() && user?.bloodGroup && user?.district && user?.phone);
 
 const sortByDateDesc = (items, field = "createdAt") =>
   [...items].sort((left, right) => new Date(right[field] || 0) - new Date(left[field] || 0));
@@ -52,10 +61,22 @@ export const updateProfile = async (req, res, next) => {
 // @route  PATCH /api/users/availability
 // @desc   Toggle the donor's Available / Unavailable status. Turning this
 //         off immediately removes the donor from seeker search results and
-//         from any new broadcast/emergency request matching.
+//         from any new broadcast/emergency request matching. Turning it
+//         back ON is blocked while the donor is still inside the 120-day
+//         post-donation cooldown window.
 export const toggleAvailability = async (req, res, next) => {
   try {
     const { isAvailable } = req.body;
+    const currentUser = serializeDoc(await collections.users.doc(req.user.id).get());
+
+    if (isAvailable && isInCooldown(currentUser.lastDonationDate)) {
+      const daysLeft = getDaysUntilEligible(currentUser.lastDonationDate);
+      res.status(409);
+      throw new Error(
+        `আপনি সম্প্রতি রক্ত দিয়েছেন — নিরাপত্তার জন্য আরও ${daysLeft} দিন পর আবার Available হতে পারবেন।`
+      );
+    }
+
     await collections.users.doc(req.user.id).update({
       isAvailable: !!isAvailable,
       updatedAt: FieldValue.serverTimestamp(),
@@ -100,6 +121,51 @@ export const getDonationHistory = async (req, res, next) => {
   }
 };
 
+// @route  POST /api/users/record-donation
+// @desc   Donor self-reports "I donated blood today" — logs it to their
+//         donation history, starts the 120-day cooldown (lastDonationDate),
+//         and automatically switches them to Unavailable so they stop
+//         being matched against new requests until they're eligible again.
+export const recordDonation = async (req, res, next) => {
+  try {
+    if (isInCooldown(req.user.lastDonationDate)) {
+      res.status(409);
+      throw new Error(
+        `এই তথ্য অনুযায়ী আপনি ইতিমধ্যে সম্প্রতি রক্ত দিয়েছেন — আরও ${getDaysUntilEligible(
+          req.user.lastDonationDate
+        )} দিন পর আবার donate করতে পারবেন।`
+      );
+    }
+
+    const { hospital, units, district } = req.body;
+    const donationDate = FieldValue.serverTimestamp();
+
+    const historyRef = await collections.donationHistory.add({
+      donorUid: req.user.id,
+      donorName: req.user.fullName,
+      bloodGroup: req.user.bloodGroup,
+      units: units || 1,
+      hospital: hospital || "স্ব-প্রতিবেদিত রক্তদান",
+      district: district || req.user.district,
+      donationDate,
+      requestId: null,
+      createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
+    });
+
+    await collections.users.doc(req.user.id).update({
+      lastDonationDate: donationDate,
+      isAvailable: false,
+      updatedAt: FieldValue.serverTimestamp(),
+    });
+
+    const user = serializeDoc(await collections.users.doc(req.user.id).get());
+    res.status(201).json({ success: true, user, historyId: historyRef.id, cooldownDays: DONATION_COOLDOWN_DAYS });
+  } catch (err) {
+    next(err);
+  }
+};
+
 const PUBLIC_DONOR_FIELDS = [
   "fullName",
   "bloodGroup",
@@ -116,8 +182,11 @@ const PUBLIC_DONOR_FIELDS = [
   "id",
 ];
 
-const toPublicDonor = (user) =>
-  Object.fromEntries(PUBLIC_DONOR_FIELDS.filter((field) => field in user).map((field) => [field, user[field]]));
+const toPublicDonor = (user) => ({
+  ...Object.fromEntries(PUBLIC_DONOR_FIELDS.filter((field) => field in user).map((field) => [field, user[field]])),
+  daysUntilEligible: getDaysUntilEligible(user.lastDonationDate),
+  nextEligibleDate: getNextEligibleDate(user.lastDonationDate),
+});
 
 // @route  GET /api/users/search-donors
 // @desc   Search for available donors by blood group / location. Only
@@ -132,6 +201,7 @@ export const searchDonors = async (req, res, next) => {
     const seekerDistrict = req.user.district;
 
     let donors = users
+      .filter(isCompleteProfile)
       .filter((user) => user.role !== "admin" && user.activeMode === "donor" && user.isAvailable)
       .filter((user) => !bloodGroup || user.bloodGroup === bloodGroup)
       .filter((user) => !district || user.district === district)
@@ -198,7 +268,7 @@ export const getSavedDonors = async (req, res, next) => {
 
     const donors = (
       await Promise.all(savedDonors.map(async (donorId) => serializeDoc(await collections.users.doc(donorId).get())))
-    ).filter(Boolean);
+    ).filter(Boolean).filter(isCompleteProfile);
 
     res.json({
       success: true,
