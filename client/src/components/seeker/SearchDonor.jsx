@@ -159,7 +159,7 @@ export default function SearchDonor() {
 
             <div className="mb-1 flex flex-wrap items-center gap-2">
               <span className="rounded-full bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-700 dark:bg-brand-950/50 dark:text-brand-300">
-                {d.bloodGroup}
+                {d.bloodGroup}{typeof d.age === "number" ? ` · ${d.age}y` : ""}
               </span>
               {typeof d.distanceKm === "number" && (
                 <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-600 dark:bg-white/10 dark:text-gray-300">

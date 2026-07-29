@@ -12,33 +12,38 @@ import {
   FiAlertTriangle,
   FiBookmark,
   FiList,
+  FiUsers,
 } from "react-icons/fi";
 import Logo from "../common/Logo.jsx";
+import { useLanguage } from "../../context/LanguageContext.jsx";
 
 const donorLinks = [
-  { to: "/dashboard/donor", label: "Overview", icon: FiGrid, end: true },
-  { to: "/dashboard/donor/profile", label: "Profile", icon: FiUser },
-  { to: "/dashboard/donor/availability", label: "Availability", icon: FiToggleLeft },
-  { to: "/dashboard/donor/history", label: "Donation History", icon: FiClock },
-  { to: "/dashboard/donor/requests", label: "Incoming Requests", icon: FiInbox },
-  { to: "/dashboard/donor/nearby", label: "Nearby Requests", icon: FiMapPin },
-  { to: "/dashboard/donor/notifications", label: "Notifications", icon: FiBell },
-  { to: "/dashboard/donor/settings", label: "Settings", icon: FiSettings },
+  { to: "/dashboard/donor", labelKey: "sidebar.overview", icon: FiGrid, end: true },
+  { to: "/dashboard/donor/profile", labelKey: "sidebar.profile", icon: FiUser },
+  { to: "/dashboard/donor/availability", labelKey: "sidebar.availability", icon: FiToggleLeft },
+  { to: "/dashboard/donor/history", labelKey: "sidebar.donationHistory", icon: FiClock },
+  { to: "/dashboard/donor/requests", labelKey: "sidebar.incomingRequests", icon: FiInbox },
+  { to: "/dashboard/donor/nearby", labelKey: "sidebar.nearbyRequests", icon: FiMapPin },
+  { to: "/dashboard/donor/organizations", labelKey: "sidebar.organizations", icon: FiUsers },
+  { to: "/dashboard/donor/notifications", labelKey: "sidebar.notifications", icon: FiBell },
+  { to: "/dashboard/donor/settings", labelKey: "sidebar.settings", icon: FiSettings },
 ];
 
 const seekerLinks = [
-  { to: "/dashboard/seeker", label: "Overview", icon: FiGrid, end: true },
-  { to: "/dashboard/seeker/profile", label: "Profile", icon: FiUser },
-  { to: "/dashboard/seeker/search", label: "Search Donor", icon: FiSearch },
-  { to: "/dashboard/seeker/emergency", label: "Emergency Request", icon: FiAlertTriangle },
-  { to: "/dashboard/seeker/my-requests", label: "My Requests", icon: FiList },
-  { to: "/dashboard/seeker/saved", label: "Saved Donors", icon: FiBookmark },
-  { to: "/dashboard/seeker/history", label: "Request History", icon: FiClock },
-  { to: "/dashboard/seeker/notifications", label: "Notifications", icon: FiBell },
-  { to: "/dashboard/seeker/settings", label: "Settings", icon: FiSettings },
+  { to: "/dashboard/seeker", labelKey: "sidebar.overview", icon: FiGrid, end: true },
+  { to: "/dashboard/seeker/profile", labelKey: "sidebar.profile", icon: FiUser },
+  { to: "/dashboard/seeker/search", labelKey: "sidebar.searchDonor", icon: FiSearch },
+  { to: "/dashboard/seeker/emergency", labelKey: "sidebar.emergencyRequest", icon: FiAlertTriangle },
+  { to: "/dashboard/seeker/my-requests", labelKey: "sidebar.myRequests", icon: FiList },
+  { to: "/dashboard/seeker/saved", labelKey: "sidebar.savedDonors", icon: FiBookmark },
+  { to: "/dashboard/seeker/organizations", labelKey: "sidebar.organizations", icon: FiUsers },
+  { to: "/dashboard/seeker/history", labelKey: "sidebar.requestHistory", icon: FiClock },
+  { to: "/dashboard/seeker/notifications", labelKey: "sidebar.notifications", icon: FiBell },
+  { to: "/dashboard/seeker/settings", labelKey: "sidebar.settings", icon: FiSettings },
 ];
 
 export default function Sidebar({ mode, open, onClose }) {
+  const { t } = useLanguage();
   const links = mode === "seeker" ? seekerLinks : donorLinks;
 
   return (
@@ -73,7 +78,7 @@ export default function Sidebar({ mode, open, onClose }) {
               }
             >
               <link.icon size={18} />
-              {link.label}
+              {t(link.labelKey)}
             </NavLink>
           ))}
         </nav>

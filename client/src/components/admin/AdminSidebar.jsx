@@ -8,21 +8,26 @@ import {
   FiCheckCircle,
   FiBarChart2,
   FiSettings,
+  FiHeart,
 } from "react-icons/fi";
 import Logo from "../common/Logo.jsx";
+import { useLanguage } from "../../context/LanguageContext.jsx";
 
 const links = [
-  { to: "/admin", label: "Dashboard", icon: FiGrid, end: true },
-  { to: "/admin/users", label: "Manage Users", icon: FiUsers, end: true },
-  { to: "/admin/users?mode=donor", label: "Manage Donors", icon: FiDroplet, matchTo: "/admin/users" },
-  { to: "/admin/users?mode=seeker", label: "Manage Seekers", icon: FiSearch, matchTo: "/admin/users" },
-  { to: "/admin/requests", label: "Manage Blood Requests", icon: FiClipboard },
-  { to: "/admin/requests?status=pending", label: "Approve Requests", icon: FiCheckCircle, matchTo: "/admin/requests" },
-  { to: "/admin/analytics", label: "Reports & Analytics", icon: FiBarChart2 },
-  { to: "/admin/settings", label: "Settings", icon: FiSettings },
+  { to: "/admin", labelKey: "admin.dashboard", icon: FiGrid, end: true },
+  { to: "/admin/users", labelKey: "admin.manageUsers", icon: FiUsers, end: true },
+  { to: "/admin/users?mode=donor", labelKey: "admin.manageDonors", icon: FiDroplet, matchTo: "/admin/users" },
+  { to: "/admin/users?mode=seeker", labelKey: "admin.manageSeekers", icon: FiSearch, matchTo: "/admin/users" },
+  { to: "/admin/requests", labelKey: "admin.manageRequests", icon: FiClipboard },
+  { to: "/admin/requests?status=pending", labelKey: "admin.approveRequests", icon: FiCheckCircle, matchTo: "/admin/requests" },
+  { to: "/admin/organizations", labelKey: "admin.organizations", icon: FiHeart },
+  { to: "/admin/analytics", labelKey: "admin.analytics", icon: FiBarChart2 },
+  { to: "/admin/settings", labelKey: "admin.settings", icon: FiSettings },
 ];
 
 export default function AdminSidebar({ open, onClose }) {
+  const { t } = useLanguage();
+
   return (
     <>
       {open && <div className="fixed inset-0 z-30 bg-black/40 lg:hidden" onClick={onClose} />}
@@ -56,7 +61,7 @@ export default function AdminSidebar({ open, onClose }) {
               }}
             >
               <link.icon size={18} />
-              {link.label}
+              {t(link.labelKey)}
             </NavLink>
           ))}
         </nav>

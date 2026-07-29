@@ -5,6 +5,7 @@ import { FiLoader, FiUpload } from "react-icons/fi";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { updateProfile } from "../../services/userService.js";
 import { uploadProfileImage } from "../../services/uploadImage.js";
+import { getAge } from "../../utils/age.js";
 import districts from "../../utils/districts.js";
 
 const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
@@ -14,10 +15,12 @@ export default function ProfileForm() {
   const [submitting, setSubmitting] = useState(false);
   const [preview, setPreview] = useState(user?.photoURL || null);
   const [photoFile, setPhotoFile] = useState(null);
+  const age = getAge(user?.dateOfBirth);
 
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm({
     defaultValues: {
@@ -27,8 +30,12 @@ export default function ProfileForm() {
       district: user?.district,
       upazila: user?.upazila,
       address: user?.address,
+      dateOfBirth: user?.dateOfBirth ? new Date(user.dateOfBirth).toISOString().slice(0, 10) : "",
     },
   });
+
+  const watchedDob = watch("dateOfBirth");
+  const livePreviewAge = getAge(watchedDob);
 
   const handlePhotoChange = (e) => {
     const file = e.target.files?.[0];
@@ -67,7 +74,12 @@ export default function ProfileForm() {
           )}
           <input type="file" accept="image/*" className="hidden" onChange={handlePhotoChange} />
         </label>
-        <p className="text-sm text-gray-500 dark:text-gray-400">ছবি পরিবর্তন করতে ক্লিক করুন</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400">
+          ছবি পরিবর্তন করতে ক্লিক করুন
+          {age !== null && (
+            <span className="mt-1 block font-semibold text-gray-700 dark:text-gray-200">বয়স: {age} বছর</span>
+          )}
+        </p>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -91,16 +103,26 @@ export default function ProfileForm() {
           </select>
         </div>
         <div>
+          <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Date of Birth</label>
+          <input type="date" {...register("dateOfBirth")} className={inputClass} />
+          {livePreviewAge !== null && (
+            <p className="mt-1 text-xs text-gray-400">বয়স: {livePreviewAge} বছর</p>
+          )}
+        </div>
+        <div>
+          <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Upazila</label>
+          <input {...register("upazila")} className={inputClass} />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div>
           <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">District</label>
           <select {...register("district")} className={inputClass}>
             {districts.map((d) => (
               <option key={d} value={d}>{d}</option>
             ))}
           </select>
-        </div>
-        <div>
-          <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Upazila</label>
-          <input {...register("upazila")} className={inputClass} />
         </div>
       </div>
 

@@ -32,6 +32,7 @@ const AdminUsers = lazy(() => import("./pages/admin/AdminUsers.jsx"));
 const AdminRequests = lazy(() => import("./pages/admin/AdminRequests.jsx"));
 const AdminAnalytics = lazy(() => import("./pages/admin/AdminAnalytics.jsx"));
 const AdminSettings = lazy(() => import("./pages/admin/AdminSettings.jsx"));
+const AdminOrganizations = lazy(() => import("./pages/admin/AdminOrganizations.jsx"));
 
 // 404
 const NotFound = lazy(() => import("./pages/NotFound.jsx"));
@@ -74,6 +75,7 @@ function App() {
           <Route path="requests" element={<AdminRequests />} />
           <Route path="analytics" element={<AdminAnalytics />} />
           <Route path="settings" element={<AdminSettings />} />
+          <Route path="organizations" element={<AdminOrganizations />} />
         </Route>
 
         <Route path="*" element={<NotFound />} />

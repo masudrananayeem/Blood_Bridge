@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext.jsx";
 import ThemeToggle from "../common/ThemeToggle.jsx";
+import LanguageToggle from "../common/LanguageToggle.jsx";
 import RoleSwitch from "./RoleSwitch.jsx";
 import { getNotifications, markAsRead } from "../../services/notificationService.js";
 
@@ -147,6 +148,7 @@ export default function Topbar({ onMenuClick }) {
           </AnimatePresence>
         </div>
 
+        <LanguageToggle />
         <ThemeToggle />
 
         <div className="relative">

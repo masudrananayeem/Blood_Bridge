@@ -66,7 +66,7 @@ export default function SavedDonorsList() {
 
           <div className="mb-2 flex flex-wrap items-center gap-2">
             <span className="inline-block rounded-full bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-700 dark:bg-brand-950/50 dark:text-brand-300">
-              {d.bloodGroup}
+              {d.bloodGroup}{typeof d.age === "number" ? ` · ${d.age}y` : ""}
             </span>
             {d.daysUntilEligible > 0 ? (
               <span className="inline-block rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-600 dark:bg-amber-950/40">

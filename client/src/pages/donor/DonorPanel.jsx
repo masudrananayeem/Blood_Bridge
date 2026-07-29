@@ -5,6 +5,7 @@ import DonorAvailability from "./DonorAvailability.jsx";
 import DonorHistoryPage from "./DonorHistoryPage.jsx";
 import DonorRequestsPage from "./DonorRequestsPage.jsx";
 import DonorNearbyPage from "./DonorNearbyPage.jsx";
+import DonorOrganizationsPage from "./DonorOrganizationsPage.jsx";
 import DonorNotificationsPage from "./DonorNotificationsPage.jsx";
 import DonorSettingsPage from "./DonorSettingsPage.jsx";
 
@@ -18,6 +19,7 @@ export default function DonorPanel() {
       <Route path="history" element={<DonorHistoryPage />} />
       <Route path="requests" element={<DonorRequestsPage />} />
       <Route path="nearby" element={<DonorNearbyPage />} />
+      <Route path="organizations" element={<DonorOrganizationsPage />} />
       <Route path="notifications" element={<DonorNotificationsPage />} />
       <Route path="settings" element={<DonorSettingsPage />} />
     </Routes>

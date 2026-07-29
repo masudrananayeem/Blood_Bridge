@@ -75,7 +75,7 @@ export default function RegisterPage() {
         phone: formData.phone,
         bloodGroup: formData.bloodGroup,
         gender: formData.gender,
-        dob: formData.dob,
+        dateOfBirth: formData.dateOfBirth,
         district: formData.district,
         upazila: formData.upazila,
         address: formData.address,
@@ -222,8 +222,8 @@ export default function RegisterPage() {
           <FormInput
             label="Date of Birth"
             type="date"
-            error={errors.dob}
-            registration={register("dob", { required: "জন্ম তারিখ দিন" })}
+            error={errors.dateOfBirth}
+            registration={register("dateOfBirth", { required: "জন্ম তারিখ দিন" })}
           />
         </div>
 

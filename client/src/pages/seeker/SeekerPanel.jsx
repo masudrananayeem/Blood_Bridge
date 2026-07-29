@@ -5,6 +5,7 @@ import SeekerSearchPage from "./SeekerSearchPage.jsx";
 import SeekerEmergencyPage from "./SeekerEmergencyPage.jsx";
 import SeekerMyRequestsPage from "./SeekerMyRequestsPage.jsx";
 import SeekerSavedPage from "./SeekerSavedPage.jsx";
+import SeekerOrganizationsPage from "./SeekerOrganizationsPage.jsx";
 import SeekerHistoryPage from "./SeekerHistoryPage.jsx";
 import SeekerNotificationsPage from "./SeekerNotificationsPage.jsx";
 import SeekerSettingsPage from "./SeekerSettingsPage.jsx";
@@ -19,6 +20,7 @@ export default function SeekerPanel() {
       <Route path="emergency" element={<SeekerEmergencyPage />} />
       <Route path="my-requests" element={<SeekerMyRequestsPage />} />
       <Route path="saved" element={<SeekerSavedPage />} />
+      <Route path="organizations" element={<SeekerOrganizationsPage />} />
       <Route path="history" element={<SeekerHistoryPage />} />
       <Route path="notifications" element={<SeekerNotificationsPage />} />
       <Route path="settings" element={<SeekerSettingsPage />} />
