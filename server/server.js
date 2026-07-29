@@ -10,6 +10,7 @@ import userRoutes from "./routes/userRoutes.js";
 import requestRoutes from "./routes/requestRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
+import organizationRoutes from "./routes/organizationRoutes.js";
 
 dotenv.config();
 
@@ -52,6 +53,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/requests", requestRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/organizations", organizationRoutes);
 
 // ---- Error handling (always last) ----
 app.use(notFound);
