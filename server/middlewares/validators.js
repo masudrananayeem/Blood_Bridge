@@ -10,7 +10,7 @@ export const validateRegister = [
     .isIn(["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"])
     .withMessage("Invalid blood group"),
   body("gender").isIn(["male", "female", "other"]).withMessage("Invalid gender"),
-  body("dob").isISO8601().withMessage("Invalid date of birth"),
+  body("dateOfBirth").isISO8601().withMessage("Invalid date of birth"),
   body("district").trim().notEmpty().withMessage("District is required"),
   body("upazila").trim().notEmpty().withMessage("Upazila is required"),
   body("address").trim().notEmpty().withMessage("Address is required"),

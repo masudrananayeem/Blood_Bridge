@@ -8,6 +8,7 @@
     "dev": "nodemon server.js",
     "make-admin": "node scripts/makeAdmin.js",
     "remove-admin": "node scripts/removeAdmin.js",
+    "list-admins": "node scripts/listAdmins.js",
     "cleanup-users": "node scripts/cleanupOrphanedUsers.js"
   },
   "dependencies": {
