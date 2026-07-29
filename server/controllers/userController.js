@@ -3,6 +3,7 @@ import { collections, serializeDoc, serializeDocs, FieldValue } from "../utils/f
 import { maskDonorContact } from "../utils/mask.js";
 import { distanceBetweenDistricts } from "../utils/districtCoords.js";
 import { deleteUserCascade } from "../utils/deleteUserData.js";
+import { deleteCloudinaryImage } from "../utils/cloudinaryHelpers.js";
 import { getDaysUntilEligible, getNextEligibleDate, isInCooldown, DONATION_COOLDOWN_DAYS } from "../utils/donationEligibility.js";
 
 const loadUsers = async () => serializeDocs(await collections.users.get());
@@ -18,6 +19,19 @@ const isCompleteProfile = (user) =>
 const sortByDateDesc = (items, field = "createdAt") =>
   [...items].sort((left, right) => new Date(right[field] || 0) - new Date(left[field] || 0));
 
+// Whole years old, from a "YYYY-MM-DD" date of birth. Returns null if
+// missing/invalid — age is optional, not every donor has entered it.
+const calculateAge = (dateOfBirth) => {
+  if (!dateOfBirth) return null;
+  const dob = new Date(dateOfBirth);
+  if (Number.isNaN(dob.getTime())) return null;
+  const today = new Date();
+  let age = today.getFullYear() - dob.getFullYear();
+  const monthDiff = today.getMonth() - dob.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) age -= 1;
+  return age;
+};
+
 // @route  PUT /api/users/profile
 // @desc   Update editable profile fields
 export const updateProfile = async (req, res, next) => {
@@ -29,7 +43,9 @@ export const updateProfile = async (req, res, next) => {
       "district",
       "upazila",
       "address",
+      "dateOfBirth",
       "photoURL",
+      "preferredLanguage",
     ];
     const updates = { updatedAt: FieldValue.serverTimestamp() };
     editable.forEach((field) => {
@@ -50,7 +66,18 @@ export const updateProfile = async (req, res, next) => {
       throw new Error("District is required");
     }
 
+    // Replacing the profile photo? Delete the old one from Cloudinary so
+    // storage doesn't fill up with orphaned images. Runs after the doc
+    // update succeeds so a slow/failed delete never blocks the response.
+    const previousPhotoURL = req.user.photoURL;
+    const photoChanged = updates.photoURL !== undefined && updates.photoURL !== previousPhotoURL;
+
     await collections.users.doc(req.user.id).update(updates);
+
+    if (photoChanged && previousPhotoURL) {
+      deleteCloudinaryImage(previousPhotoURL);
+    }
+
     const user = serializeDoc(await collections.users.doc(req.user.id).get());
     res.json({ success: true, user });
   } catch (err) {
@@ -184,6 +211,7 @@ const PUBLIC_DONOR_FIELDS = [
 
 const toPublicDonor = (user) => ({
   ...Object.fromEntries(PUBLIC_DONOR_FIELDS.filter((field) => field in user).map((field) => [field, user[field]])),
+  age: calculateAge(user.dateOfBirth),
   daysUntilEligible: getDaysUntilEligible(user.lastDonationDate),
   nextEligibleDate: getNextEligibleDate(user.lastDonationDate),
 });

@@ -40,10 +40,11 @@ export const getAnalytics = async (req, res, next) => {
 // @route  GET /api/admin/stats
 export const getDashboardStats = async (req, res, next) => {
   try {
-    const [users, requests, donationHistory] = await Promise.all([
+    const [users, requests, donationHistory, organizations] = await Promise.all([
       loadUsers(),
       loadRequests(),
       loadDonationHistory(),
+      serializeDocs(await collections.organizations.get()),
     ]);
 
     const visibleUsers = users.filter((user) => user.role !== "admin");
@@ -52,10 +53,11 @@ export const getDashboardStats = async (req, res, next) => {
     const totalSeekers = visibleUsers.filter((user) => user.activeMode === "seeker").length;
     const pendingRequests = requests.filter((request) => request.status === "pending").length;
     const completedDonations = donationHistory.length;
+    const totalOrganizations = organizations.length;
 
     res.json({
       success: true,
-      stats: { totalUsers, totalDonors, totalSeekers, pendingRequests, completedDonations },
+      stats: { totalUsers, totalDonors, totalSeekers, pendingRequests, completedDonations, totalOrganizations },
     });
   } catch (err) {
     next(err);
