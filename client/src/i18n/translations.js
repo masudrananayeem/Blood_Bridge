@@ -2,10 +2,11 @@
 // Usage: const { t } = useLanguage(); t("nav.login")
 //
 // This covers the structural UI chrome (navbar, sidebars, topbar, hero,
-// footer, common actions) that appears on every page. Deeper page-specific
-// content can be added here incrementally using the same `t("section.key")`
-// pattern — the LanguageContext and toggle are already wired everywhere
-// that matters, so adding more strings is just adding more dictionary keys.
+// footer, overview dashboards, availability panel) that appears across the
+// app. Deeper page-specific content can be added here incrementally using
+// the same `t("section.key")` pattern — the LanguageContext and toggle are
+// already wired everywhere that matters, so adding more strings is just
+// adding more dictionary keys.
 const translations = {
   en: {
     "nav.home": "Home",
@@ -59,6 +60,43 @@ const translations = {
     "common.bloodDonor": "Blood Donor",
     "common.bloodSeeker": "Blood Seeker",
     "common.welcome": "Welcome",
+    "common.years": "yrs",
+
+    "overview.donorSubtitle": "Your Donor Dashboard",
+    "overview.seekerSubtitle": "Your Seeker Dashboard",
+    "overview.adminSubtitle": "Platform overview — at a glance",
+    "overview.bloodGroup": "Blood Group",
+    "overview.pendingRequests": "Pending Requests",
+    "overview.totalDonations": "Total Donations",
+    "overview.lastDonation": "Last Donation",
+    "overview.available": "Available",
+    "overview.unavailable": "Unavailable",
+    "overview.verified": "Verified",
+    "overview.viewNearby": "View Nearby Requests",
+    "overview.viewNearbyDesc": "See who needs blood in your area",
+    "overview.viewOrganizations": "View Organizations",
+    "overview.viewOrganizationsDesc": "Voluntary groups & blood banks",
+    "overview.activeRequests": "Active Requests",
+    "overview.savedDonors": "Saved Donors",
+    "overview.totalSearches": "Total Searches",
+    "overview.emergencyRequests": "Emergency Requests",
+    "overview.emergencyCta": "Need blood urgently?",
+    "overview.emergencyCtaDesc": "Create an Emergency Request now — the 5 nearest donors are notified instantly.",
+    "overview.createRequest": "Create Request",
+    "overview.findDonor": "Find a Donor",
+    "overview.findDonorDesc": "Search by blood group / district / near me",
+
+    "availability.title": "Donation Availability",
+    "availability.subtitle": "When Unavailable, you won't be shown for new requests.",
+    "availability.cooldownNote": "You've donated recently — for safety, you can be Available again in",
+    "availability.days": "days",
+    "availability.nextEligible": "Next eligible",
+    "availability.donatedTodayQ": "Did you donate blood today?",
+    "availability.donatedTodayDesc": "Recording it adds this to your Donation History and automatically makes you Unavailable for 120 days.",
+    "availability.donatedToday": "I donated today",
+    "availability.confirm": "Confirm?",
+    "availability.yesConfirm": "Yes, confirm",
+    "availability.cancel": "Cancel",
   },
   bn: {
     "nav.home": "হোম",
@@ -112,6 +150,43 @@ const translations = {
     "common.bloodDonor": "ব্লাড ডোনার",
     "common.bloodSeeker": "ব্লাড সিকার",
     "common.welcome": "স্বাগতম",
+    "common.years": "বছর",
+
+    "overview.donorSubtitle": "আপনার ডোনার ড্যাশবোর্ড",
+    "overview.seekerSubtitle": "আপনার সিকার ড্যাশবোর্ড",
+    "overview.adminSubtitle": "প্ল্যাটফর্মের সার্বিক অবস্থা — এক নজরে",
+    "overview.bloodGroup": "ব্লাড গ্রুপ",
+    "overview.pendingRequests": "পেন্ডিং রিকোয়েস্ট",
+    "overview.totalDonations": "মোট ডোনেশন",
+    "overview.lastDonation": "সর্বশেষ ডোনেশন",
+    "overview.available": "Available",
+    "overview.unavailable": "Unavailable",
+    "overview.verified": "ভেরিফায়েড",
+    "overview.viewNearby": "Nearby Requests দেখুন",
+    "overview.viewNearbyDesc": "আপনার এলাকায় কার রক্ত দরকার",
+    "overview.viewOrganizations": "রক্তদান সংগঠন দেখুন",
+    "overview.viewOrganizationsDesc": "স্বেচ্ছাসেবী গ্রুপ ও ব্লাড ব্যাংক",
+    "overview.activeRequests": "সক্রিয় রিকোয়েস্ট",
+    "overview.savedDonors": "সেভড ডোনার",
+    "overview.totalSearches": "মোট সার্চ",
+    "overview.emergencyRequests": "জরুরি রিকোয়েস্ট",
+    "overview.emergencyCta": "জরুরি রক্তের প্রয়োজন?",
+    "overview.emergencyCtaDesc": "এখনই একটি Emergency Request তৈরি করুন — নিকটতম ৫ জন ডোনার সাথে সাথে জানবেন।",
+    "overview.createRequest": "Create Request",
+    "overview.findDonor": "ডোনার খুঁজুন",
+    "overview.findDonorDesc": "Blood group / district / near me দিয়ে খুঁজুন",
+
+    "availability.title": "ডোনেশন এভেইলেবিলিটি",
+    "availability.subtitle": "Unavailable রাখলে নতুন কোনো রিকোয়েস্ট আপনাকে দেখানো হবে না।",
+    "availability.cooldownNote": "আপনি সম্প্রতি রক্ত দিয়েছেন — শরীরের সুরক্ষার জন্য আরও অপেক্ষা করতে হবে",
+    "availability.days": "দিন",
+    "availability.nextEligible": "আবার Available",
+    "availability.donatedTodayQ": "আজকে কি রক্ত দিয়েছেন?",
+    "availability.donatedTodayDesc": "রেকর্ড করলে এটা আপনার Donation History-তে যোগ হবে এবং ১২০ দিনের জন্য স্বয়ংক্রিয়ভাবে Unavailable হয়ে যাবেন।",
+    "availability.donatedToday": "আজকে রক্ত দিয়েছি",
+    "availability.confirm": "নিশ্চিত করছেন?",
+    "availability.yesConfirm": "হ্যাঁ, নিশ্চিত",
+    "availability.cancel": "বাতিল",
   },
 };
 
