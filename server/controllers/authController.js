@@ -51,6 +51,7 @@ export const register = async (req, res, next) => {
       activeMode: "donor",
       isAvailable: true,
       isVerified: false,
+      profileComplete: true,
       lastDonationDate: null,
       savedDonors: [],
       createdAt: FieldValue.serverTimestamp(),
@@ -88,6 +89,61 @@ export const login = async (req, res, next) => {
     const token = generateToken(user.id, user.role);
 
     res.json({ success: true, token, user });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// @route  POST /api/auth/google
+// @desc   Sign in (or sign up) with Google. Unlike email/password
+//         registration, Google only ever gives us a name/email/photo — never
+//         blood group, phone, district, or date of birth, which this app
+//         genuinely can't function without. So a brand-new Google user gets
+//         a minimal profile with `profileComplete: false`; the frontend
+//         then routes them to a "Complete Your Profile" step before they can
+//         use the rest of the app. An existing Google user just logs in
+//         normally, same as `login` above.
+export const googleAuth = async (req, res, next) => {
+  try {
+    const { firebaseIdToken } = req.body;
+    if (!firebaseIdToken) {
+      res.status(400);
+      throw new Error("Missing Firebase ID token");
+    }
+
+    const decoded = await admin.auth().verifyIdToken(firebaseIdToken);
+    const userRef = collections.users.doc(decoded.uid);
+    const existing = await userRef.get();
+
+    if (!existing.exists) {
+      await userRef.set({
+        firebaseUid: decoded.uid,
+        fullName: decoded.name || "",
+        email: decoded.email || "",
+        phone: "",
+        bloodGroup: "",
+        gender: "",
+        dateOfBirth: null,
+        district: "",
+        upazila: "",
+        address: "",
+        photoURL: decoded.picture || "",
+        role: "donor",
+        activeMode: "donor",
+        isAvailable: false, // stays hidden from seekers until the profile is actually complete
+        isVerified: false,
+        profileComplete: false,
+        lastDonationDate: null,
+        savedDonors: [],
+        createdAt: FieldValue.serverTimestamp(),
+        updatedAt: FieldValue.serverTimestamp(),
+      });
+    }
+
+    const user = serializeDoc(await userRef.get());
+    const token = generateToken(user.id, user.role);
+
+    res.json({ success: true, token, user, isNewUser: !existing.exists });
   } catch (err) {
     next(err);
   }

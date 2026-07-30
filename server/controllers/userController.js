@@ -66,6 +66,17 @@ export const updateProfile = async (req, res, next) => {
       throw new Error("District is required");
     }
 
+    // Recompute completeness against the merged (existing + new) fields —
+    // this is what flips a Google sign-up's profile from incomplete to
+    // complete once they've filled in blood group / district / phone / etc.
+    const merged = { ...req.user, ...updates };
+    updates.profileComplete = isCompleteProfile(merged);
+    // The moment an incomplete (Google) profile becomes complete for the
+    // first time, make them Available by default — same as a normal signup.
+    if (updates.profileComplete && !req.user.profileComplete) {
+      updates.isAvailable = true;
+    }
+
     // Replacing the profile photo? Delete the old one from Cloudinary so
     // storage doesn't fill up with orphaned images. Runs after the doc
     // update succeeds so a slow/failed delete never blocks the response.
