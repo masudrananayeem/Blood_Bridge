@@ -18,6 +18,7 @@ const LandingPage = lazy(() => import("./pages/LandingPage.jsx"));
 const LoginPage = lazy(() => import("./pages/auth/LoginPage.jsx"));
 const RegisterPage = lazy(() => import("./pages/auth/RegisterPage.jsx"));
 const ForgotPasswordPage = lazy(() => import("./pages/auth/ForgotPasswordPage.jsx"));
+const CompleteProfilePage = lazy(() => import("./pages/auth/CompleteProfilePage.jsx"));
 
 // Dashboard (role-switchable, protected)
 const DashboardLayout = lazy(() => import("./layouts/DashboardLayout.jsx"));
@@ -46,6 +47,14 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route
+          path="/complete-profile"
+          element={
+            <PrivateRoute skipProfileCheck>
+              <CompleteProfilePage />
+            </PrivateRoute>
+          }
+        />
 
         {/* Protected user dashboard (donor/seeker role switch happens inside) */}
         <Route

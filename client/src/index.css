@@ -5,6 +5,19 @@
 @layer base {
   html {
     scroll-behavior: smooth;
+    color-scheme: light;
+  }
+  html.dark {
+    color-scheme: dark;
+  }
+  /* Belt-and-suspenders: some browsers only pick the right native popup
+     theme (the actual open dropdown list) when color-scheme is set on the
+     <select> itself, not just an ancestor — so set it explicitly here too. */
+  select {
+    color-scheme: light;
+  }
+  html.dark select {
+    color-scheme: dark;
   }
   body {
     @apply font-body bg-white text-gray-800 dark:bg-surface-dark dark:text-gray-100 transition-colors duration-300;

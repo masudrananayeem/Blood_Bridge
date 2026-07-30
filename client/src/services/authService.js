@@ -20,6 +20,17 @@ export const syncLogin = async (firebaseIdToken) => {
   return data;
 };
 
+/**
+ * Google sign-in/sign-up. Unlike syncLogin, this auto-creates a minimal
+ * profile server-side for brand-new Google users (profileComplete: false) —
+ * the caller should check `user.profileComplete` and route to
+ * /complete-profile if it's false.
+ */
+export const googleAuth = async (firebaseIdToken) => {
+  const { data } = await axiosInstance.post("/auth/google", { firebaseIdToken });
+  return data;
+};
+
 export const fetchCurrentUser = async () => {
   const { data } = await axiosInstance.get("/auth/me");
   return data;
