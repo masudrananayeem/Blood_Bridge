@@ -4,10 +4,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FiChevronDown, FiDroplet, FiSearch } from "react-icons/fi";
 import toast from "react-hot-toast";
 import { useAuth } from "../../context/AuthContext.jsx";
+import { useLanguage } from "../../context/LanguageContext.jsx";
 import { switchMode as switchModeApi } from "../../services/userService.js";
 
 export default function RoleSwitch() {
   const { user, setUser } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -21,7 +23,7 @@ export default function RoleSwitch() {
       await switchModeApi(nextMode);
       setUser((prev) => ({ ...prev, activeMode: nextMode }));
       navigate(`/dashboard/${nextMode}`);
-      toast.success(nextMode === "donor" ? "Donor মোডে সুইচ করা হয়েছে" : "Seeker মোডে সুইচ করা হয়েছে");
+      toast.success(nextMode === "donor" ? t("common.bloodDonor") : t("common.bloodSeeker"));
     } catch {
       toast.error("মোড পরিবর্তন করা যায়নি");
     } finally {
@@ -38,7 +40,7 @@ export default function RoleSwitch() {
         className="flex items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm dark:border-white/10 dark:bg-white/5 dark:text-gray-200"
       >
         {mode === "donor" ? <FiDroplet className="text-brand-600" /> : <FiSearch className="text-brand-600" />}
-        Current Mode: {mode === "donor" ? "Blood Donor" : "Blood Seeker"}
+        {t("common.currentMode")}: {mode === "donor" ? t("common.bloodDonor") : t("common.bloodSeeker")}
         <FiChevronDown className={`transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
 
@@ -55,13 +57,13 @@ export default function RoleSwitch() {
               onClick={() => handleSwitch("donor")}
               className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm hover:bg-brand-50 dark:hover:bg-white/10"
             >
-              <FiDroplet className="text-brand-600" /> Blood Donor
+              <FiDroplet className="text-brand-600" /> {t("common.bloodDonor")}
             </button>
             <button
               onClick={() => handleSwitch("seeker")}
               className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm hover:bg-brand-50 dark:hover:bg-white/10"
             >
-              <FiSearch className="text-brand-600" /> Blood Seeker
+              <FiSearch className="text-brand-600" /> {t("common.bloodSeeker")}
             </button>
           </motion.div>
         )}

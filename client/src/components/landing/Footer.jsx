@@ -1,13 +1,7 @@
 import { Link } from "react-router-dom";
 import { FiFacebook, FiTwitter, FiInstagram, FiLinkedin } from "react-icons/fi";
 import Logo from "../common/Logo.jsx";
-
-const quickLinks = [
-  { label: "হোম", to: "/" },
-  { label: "লগইন", to: "/login" },
-  { label: "রেজিস্টার", to: "/register" },
-  { label: "How It Works", to: "/#how-it-works" },
-];
+import { useLanguage } from "../../context/LanguageContext.jsx";
 
 const legalLinks = [
   { label: "Privacy Policy", to: "/privacy-policy" },
@@ -22,20 +16,27 @@ const socials = [
 ];
 
 export default function Footer() {
+  const { t } = useLanguage();
+
+  const quickLinks = [
+    { label: t("nav.home"), to: "/" },
+    { label: t("nav.login"), to: "/login" },
+    { label: t("nav.register"), to: "/register" },
+    { label: "How It Works", to: "/#how-it-works" },
+  ];
+
   return (
     <footer className="border-t border-gray-100 bg-white dark:border-white/10 dark:bg-surface-dark">
       <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <Logo />
-            <p className="mt-4 max-w-xs text-sm text-gray-500 dark:text-gray-400">
-              রক্তদাতা ও রক্তগ্রহীতাদের একটি নিরাপদ প্ল্যাটফর্মে সংযুক্ত করার উদ্যোগ।
-            </p>
+            <p className="mt-4 max-w-xs text-sm text-gray-500 dark:text-gray-400">{t("footer.tagline")}</p>
           </div>
 
           <div>
             <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-900 dark:text-white">
-              Quick Links
+              {t("footer.quickLinks")}
             </h4>
             <ul className="space-y-2">
               {quickLinks.map((l) => (
@@ -71,7 +72,7 @@ export default function Footer() {
 
           <div>
             <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-900 dark:text-white">
-              Follow Us
+              {t("footer.contact")}
             </h4>
             <div className="flex gap-3">
               {socials.map((s, i) => (
@@ -88,7 +89,7 @@ export default function Footer() {
         </div>
 
         <div className="mt-12 border-t border-gray-100 pt-6 text-center text-sm text-gray-400 dark:border-white/10">
-          © {new Date().getFullYear()} BloodBridge. All rights reserved.
+          © {new Date().getFullYear()} BloodBridge. {t("footer.rights")}
         </div>
       </div>
     </footer>
