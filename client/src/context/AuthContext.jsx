@@ -10,7 +10,7 @@ import {
   onAuthStateChanged,
 } from "firebase/auth";
 import { auth, googleProvider } from "../config/firebase.js";
-import { syncLogin, fetchCurrentUser } from "../services/authService.js";
+import { syncLogin, googleAuth, fetchCurrentUser } from "../services/authService.js";
 
 const AuthContext = createContext(null);
 
@@ -67,9 +67,16 @@ export default function AuthProvider({ children }) {
     return syncWithBackend();
   };
 
+  // Sign in (or sign up) with Google. Returns the profile, which may have
+  // profileComplete: false for a brand-new Google user — the caller is
+  // responsible for routing them to /complete-profile in that case.
   const loginWithGoogle = async () => {
     await signInWithPopup(auth, googleProvider);
-    return syncWithBackend();
+    const idToken = await auth.currentUser.getIdToken(true);
+    const { token, user: profile } = await googleAuth(idToken);
+    localStorage.setItem("bb-token", token);
+    setUser(profile);
+    return profile;
   };
 
   const resetPassword = (email) => sendPasswordResetEmail(auth, email);
