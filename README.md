@@ -1,6 +1,6 @@
 # 🩸 BloodBridge
 
-A full-stack blood donation management platform that connects blood donors with people in need through one secure, single-account platform. Users register once and can switch between **Donor** and **Seeker** mode at any time.This is very easy to enroll as a Doner and a Seeker.
+A full-stack blood donation management platform that connects blood donors with people in need through one secure, single-account platform. Users register once and can switch between **Donor** and **Seeker** mode at any time.
 
 ---
 
