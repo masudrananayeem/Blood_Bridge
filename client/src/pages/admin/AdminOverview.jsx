@@ -15,6 +15,7 @@ import {
 } from "react-icons/fi";
 import { getDashboardStats, getAnalytics } from "../../services/adminService.js";
 import { useAuth } from "../../context/AuthContext.jsx";
+import { useLanguage } from "../../context/LanguageContext.jsx";
 import StatCard from "../../components/dashboard/StatCard.jsx";
 import WelcomeBanner from "../../components/dashboard/WelcomeBanner.jsx";
 import Loader from "../../components/common/Loader.jsx";
@@ -28,6 +29,7 @@ const quickLinks = [
 
 export default function AdminOverview() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [stats, setStats] = useState(null);
   const [bloodGroupData, setBloodGroupData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -48,8 +50,8 @@ export default function AdminOverview() {
   return (
     <div className="space-y-6">
       <WelcomeBanner
-        title={`স্বাগতম, ${user?.fullName?.split(" ")[0] || "Admin"} 👋`}
-        subtitle="প্ল্যাটফর্মের সার্বিক অবস্থা — এক নজরে"
+        title={`${t("common.welcome")}, ${user?.fullName?.split(" ")[0] || "Admin"} 👋`}
+        subtitle={t("overview.adminSubtitle")}
         photoURL={user?.photoURL}
         initial={user?.fullName?.charAt(0) || "A"}
         badges={[{ label: "Admin" }]}
@@ -62,10 +64,10 @@ export default function AdminOverview() {
         <>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
             <StatCard icon={FiUsers} label="Total Users" value={stats?.totalUsers ?? 0} />
-            <StatCard icon={FiDroplet} label="Total Donors" value={stats?.totalDonors ?? 0} tint="green" />
-            <StatCard icon={FiSearch} label="Total Seekers" value={stats?.totalSeekers ?? 0} tint="blue" />
-            <StatCard icon={FiClock} label="Pending Requests" value={stats?.pendingRequests ?? 0} tint="amber" />
-            <StatCard icon={FiCheckCircle} label="Completed Donations" value={stats?.completedDonations ?? 0} tint="green" />
+            <StatCard icon={FiDroplet} label={t("admin.manageDonors")} value={stats?.totalDonors ?? 0} tint="green" />
+            <StatCard icon={FiSearch} label={t("admin.manageSeekers")} value={stats?.totalSeekers ?? 0} tint="blue" />
+            <StatCard icon={FiClock} label={t("overview.pendingRequests")} value={stats?.pendingRequests ?? 0} tint="amber" />
+            <StatCard icon={FiCheckCircle} label={t("overview.totalDonations")} value={stats?.completedDonations ?? 0} tint="green" />
           </div>
 
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">

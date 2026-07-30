@@ -22,6 +22,9 @@ export default function LoginPage() {
   } = useForm();
 
   const redirectAfterLogin = (profile) => {
+    if (profile?.profileComplete === false) {
+      return navigate("/complete-profile", { replace: true });
+    }
     const from = location.state?.from?.pathname;
     if (from) return navigate(from, { replace: true });
     navigate(profile?.role === "admin" ? "/admin" : "/dashboard", { replace: true });

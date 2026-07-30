@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { FiSearch, FiList, FiBookmark, FiAlertTriangle, FiUsers, FiArrowRight } from "react-icons/fi";
 import { useAuth } from "../../context/AuthContext.jsx";
+import { useLanguage } from "../../context/LanguageContext.jsx";
 import StatCard from "../../components/dashboard/StatCard.jsx";
 import WelcomeBanner from "../../components/dashboard/WelcomeBanner.jsx";
 import { getMyRequests } from "../../services/requestService.js";
@@ -9,6 +10,7 @@ import { getSavedDonors } from "../../services/userService.js";
 
 export default function SeekerOverview() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [activeCount, setActiveCount] = useState("—");
   const [emergencyCount, setEmergencyCount] = useState("—");
   const [savedCount, setSavedCount] = useState("—");
@@ -27,18 +29,18 @@ export default function SeekerOverview() {
   return (
     <div className="space-y-6">
       <WelcomeBanner
-        title={`স্বাগতম, ${user?.fullName?.split(" ")[0] || "Seeker"} 👋`}
-        subtitle="আপনার সিকার ড্যাশবোর্ড"
+        title={`${t("common.welcome")}, ${user?.fullName?.split(" ")[0] || "Seeker"} 👋`}
+        subtitle={t("overview.seekerSubtitle")}
         photoURL={user?.photoURL}
         initial={user?.fullName?.charAt(0) || "S"}
         badges={[{ label: user?.district || "—" }]}
       />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard icon={FiList} label="Active Requests" value={activeCount} tint="amber" />
-        <StatCard icon={FiBookmark} label="Saved Donors" value={savedCount} tint="blue" />
-        <StatCard icon={FiSearch} label="Total Searches" value="—" />
-        <StatCard icon={FiAlertTriangle} label="Emergency Requests" value={emergencyCount} tint="green" />
+        <StatCard icon={FiList} label={t("overview.activeRequests")} value={activeCount} tint="amber" />
+        <StatCard icon={FiBookmark} label={t("overview.savedDonors")} value={savedCount} tint="blue" />
+        <StatCard icon={FiSearch} label={t("overview.totalSearches")} value="—" />
+        <StatCard icon={FiAlertTriangle} label={t("overview.emergencyRequests")} value={emergencyCount} tint="green" />
       </div>
 
       <Link
@@ -47,11 +49,11 @@ export default function SeekerOverview() {
       >
         <div className="pointer-events-none absolute -right-6 -top-8 h-32 w-32 rounded-full bg-red-500/10 blur-2xl" />
         <div className="relative">
-          <h3 className="font-semibold text-gray-900 dark:text-white">জরুরি রক্তের প্রয়োজন?</h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400">এখনই একটি Emergency Request তৈরি করুন — নিকটতম ৫ জন ডোনার সাথে সাথে জানবেন।</p>
+          <h3 className="font-semibold text-gray-900 dark:text-white">{t("overview.emergencyCta")}</h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{t("overview.emergencyCtaDesc")}</p>
         </div>
         <span className="btn-primary relative !px-5 !py-2.5 text-sm">
-          Create Request <FiArrowRight />
+          {t("overview.createRequest")} <FiArrowRight />
         </span>
       </Link>
 
@@ -64,8 +66,8 @@ export default function SeekerOverview() {
             <FiSearch size={20} />
           </div>
           <div>
-            <p className="font-semibold text-gray-900 dark:text-white">ডোনার খুঁজুন</p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Blood group / district / near me দিয়ে খুঁজুন</p>
+            <p className="font-semibold text-gray-900 dark:text-white">{t("overview.findDonor")}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{t("overview.findDonorDesc")}</p>
           </div>
         </Link>
 
@@ -77,8 +79,8 @@ export default function SeekerOverview() {
             <FiUsers size={20} />
           </div>
           <div>
-            <p className="font-semibold text-gray-900 dark:text-white">রক্তদান সংগঠন দেখুন</p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">স্বেচ্ছাসেবী গ্রুপ ও ব্লাড ব্যাংক</p>
+            <p className="font-semibold text-gray-900 dark:text-white">{t("overview.viewOrganizations")}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{t("overview.viewOrganizationsDesc")}</p>
           </div>
         </Link>
       </div>

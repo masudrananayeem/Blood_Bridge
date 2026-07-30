@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { FcGoogle } from "react-icons/fc";
 import { FiLoader, FiUpload, FiMail, FiAlertTriangle } from "react-icons/fi";
 import AuthLayout from "../../components/auth/AuthLayout.jsx";
 import FormInput from "../../components/auth/FormInput.jsx";
@@ -14,13 +15,30 @@ import districts from "../../utils/districts.js";
 const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 
 export default function RegisterPage() {
-  const { registerWithEmail, resendVerificationEmail } = useAuth();
+  const { registerWithEmail, resendVerificationEmail, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [preview, setPreview] = useState(null);
   const [photoFile, setPhotoFile] = useState(null);
   const [registeredEmail, setRegisteredEmail] = useState(null);
   const [resending, setResending] = useState(false);
+
+  const handleGoogleSignup = async () => {
+    setGoogleLoading(true);
+    try {
+      const profile = await loginWithGoogle();
+      // Brand-new Google sign-ups always come back with profileComplete:
+      // false (Google never gives us blood group / phone / district), so
+      // this always routes to the follow-up step — never straight to the
+      // dashboard.
+      navigate(profile?.profileComplete === false ? "/complete-profile" : "/dashboard", { replace: true });
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Google দিয়ে সাইন আপ করা যায়নি, আবার চেষ্টা করুন।");
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
 
   const {
     register,
@@ -126,6 +144,21 @@ export default function RegisterPage() {
 
   return (
     <AuthLayout title="অ্যাকাউন্ট তৈরি করুন" subtitle="একবার রেজিস্টার করে Donor ও Seeker — দুই ভূমিকাই ব্যবহার করুন">
+      <button
+        onClick={handleGoogleSignup}
+        disabled={googleLoading}
+        className="mb-6 flex w-full items-center justify-center gap-3 rounded-full border border-gray-200 bg-white py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition-colors hover:bg-gray-50 dark:border-white/10 dark:bg-white/5 dark:text-gray-200"
+      >
+        {googleLoading ? <FiLoader className="animate-spin" /> : <FcGoogle size={20} />}
+        Google দিয়ে সাইন আপ করুন
+      </button>
+
+      <div className="mb-6 flex items-center gap-3 text-xs text-gray-400">
+        <div className="h-px flex-1 bg-gray-200 dark:bg-white/10" />
+        অথবা ফর্ম পূরণ করুন
+        <div className="h-px flex-1 bg-gray-200 dark:bg-white/10" />
+      </div>
+
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
         {/* Profile picture */}
         <div className="mb-6 flex items-center gap-4">
