@@ -16,6 +16,11 @@ export default function ThemeProvider({ children }) {
     } else {
       root.classList.remove("dark");
     }
+    // Setting this as an inline style (highest specificity, applied
+    // immediately) is what actually gets browsers to render native form
+    // controls — <select> dropdown popups, checkboxes, scrollbars — in the
+    // matching theme. A plain CSS rule alone was unreliable across browsers.
+    root.style.colorScheme = theme;
     localStorage.setItem("bloodbridge-theme", theme);
   }, [theme]);
 
