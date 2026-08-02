@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import { FiDroplet } from "react-icons/fi";
 import { getDonationHistory } from "../../services/userService.js";
 import Loader from "../common/Loader.jsx";
+import { useLanguage } from "../../context/LanguageContext.jsx";
 
 export default function DonationHistory() {
+  const { t } = useLanguage();
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -20,7 +22,7 @@ export default function DonationHistory() {
     return (
       <div className="glass-card flex flex-col items-center gap-3 p-12 text-center">
         <FiDroplet size={32} className="text-brand-300" />
-        <p className="text-gray-500 dark:text-gray-400">এখনো কোনো রক্তদানের রেকর্ড নেই।</p>
+        <p className="text-gray-500 dark:text-gray-400">{t("donationHistory.empty")}</p>
       </div>
     );
   }

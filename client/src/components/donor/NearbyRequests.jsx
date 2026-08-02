@@ -3,8 +3,10 @@ import { motion } from "framer-motion";
 import { FiMapPin } from "react-icons/fi";
 import { getNearbyRequests } from "../../services/requestService.js";
 import Loader from "../common/Loader.jsx";
+import { useLanguage } from "../../context/LanguageContext.jsx";
 
 export default function NearbyRequests() {
+  const { t } = useLanguage();
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -20,7 +22,7 @@ export default function NearbyRequests() {
   if (requests.length === 0) {
     return (
       <div className="glass-card p-12 text-center text-gray-500 dark:text-gray-400">
-        আপনার জেলায় এই মুহূর্তে অন্য কোনো রিকোয়েস্ট নেই।
+        {t("nearby.empty")}
       </div>
     );
   }
