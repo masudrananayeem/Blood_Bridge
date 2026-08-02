@@ -4,16 +4,19 @@ import { FiMenu, FiLogOut, FiChevronDown, FiShield } from "react-icons/fi";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext.jsx";
+import { useLanguage } from "../../context/LanguageContext.jsx";
 import ThemeToggle from "../common/ThemeToggle.jsx";
+import LanguageToggle from "../common/LanguageToggle.jsx";
 
 export default function AdminTopbar({ onMenuClick }) {
   const { user, logout } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
 
   const handleLogout = async () => {
     await logout();
-    toast.success("লগআউট হয়েছে");
+    toast.success(t("common.loggedOut"));
     navigate("/");
   };
 
@@ -27,11 +30,12 @@ export default function AdminTopbar({ onMenuClick }) {
           <FiMenu size={20} />
         </button>
         <span className="hidden items-center gap-2 rounded-full bg-brand-50 px-4 py-2 text-sm font-medium text-brand-700 dark:bg-brand-950/40 dark:text-brand-300 sm:flex">
-          <FiShield /> Administrator
+          <FiShield /> {t("common.administrator")}
         </span>
       </div>
 
       <div className="flex items-center gap-3">
+        <LanguageToggle />
         <ThemeToggle />
         <div className="relative">
           <button
@@ -60,7 +64,7 @@ export default function AdminTopbar({ onMenuClick }) {
                   onClick={handleLogout}
                   className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30"
                 >
-                  <FiLogOut size={16} /> Logout
+                  <FiLogOut size={16} /> {t("nav.logout")}
                 </button>
               </motion.div>
             )}

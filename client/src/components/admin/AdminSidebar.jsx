@@ -9,6 +9,7 @@ import {
   FiBarChart2,
   FiSettings,
   FiHeart,
+  FiMessageSquare,
 } from "react-icons/fi";
 import Logo from "../common/Logo.jsx";
 import { useLanguage } from "../../context/LanguageContext.jsx";
@@ -21,6 +22,7 @@ const links = [
   { to: "/admin/requests", labelKey: "admin.manageRequests", icon: FiClipboard },
   { to: "/admin/requests?status=pending", labelKey: "admin.approveRequests", icon: FiCheckCircle, matchTo: "/admin/requests" },
   { to: "/admin/organizations", labelKey: "admin.organizations", icon: FiHeart },
+  { to: "/admin/feedback", labelKey: "admin.feedback", icon: FiMessageSquare },
   { to: "/admin/analytics", labelKey: "admin.analytics", icon: FiBarChart2 },
   { to: "/admin/settings", labelKey: "admin.settings", icon: FiSettings },
 ];
