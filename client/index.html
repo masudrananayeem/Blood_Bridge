@@ -7,6 +7,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="BloodBridge — Connect blood donors with people in need through one secure platform." />
     <title>BloodBridge | Donate Blood, Save Lives</title>
+    <script>
+      (function () {
+        var saved = localStorage.getItem("bloodbridge-theme");
+        var theme = saved || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        var root = document.documentElement;
+        if (theme === "dark") root.classList.add("dark");
+        root.style.colorScheme = theme;
+      })();
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
