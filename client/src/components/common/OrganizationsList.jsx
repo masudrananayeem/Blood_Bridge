@@ -4,10 +4,12 @@ import { FiSearch, FiMapPin, FiPhone, FiMail, FiGlobe, FiShield, FiUsers } from 
 import { getOrganizations } from "../../services/organizationService.js";
 import districts from "../../utils/districts.js";
 import Loader from "./Loader.jsx";
+import { useLanguage } from "../../context/LanguageContext.jsx";
 
 const TYPES = ["Voluntary Group", "NGO", "Blood Bank", "Hospital"];
 
 export default function OrganizationsList() {
+  const { t } = useLanguage();
   const [filters, setFilters] = useState({ district: "", type: "", search: "" });
   const [organizations, setOrganizations] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -40,8 +42,7 @@ export default function OrganizationsList() {
       <div className="glass-card flex items-start gap-3 p-5">
         <FiUsers className="mt-0.5 shrink-0 text-brand-500" size={20} />
         <p className="text-sm text-gray-600 dark:text-gray-300">
-          এখানে বিভিন্ন রক্তদান সংগঠন, স্বেচ্ছাসেবী গ্রুপ, ব্লাড ব্যাংক ও হাসপাতালের তালিকা পাবেন — সরাসরি যোগাযোগের
-          তথ্যসহ।
+          {t("orgList.intro")}
         </p>
       </div>
 
@@ -50,23 +51,23 @@ export default function OrganizationsList() {
           name="search"
           value={filters.search}
           onChange={handleChange}
-          placeholder="নাম দিয়ে খুঁজুন..."
+          placeholder={t("orgList.searchPlaceholder")}
           className={inputClass}
         />
         <select name="district" value={filters.district} onChange={handleChange} className={inputClass}>
-          <option value="">যেকোনো District</option>
+          <option value="">{t("common.anyDistrict")}</option>
           {districts.map((d) => (
             <option key={d} value={d}>{d}</option>
           ))}
         </select>
         <select name="type" value={filters.type} onChange={handleChange} className={inputClass}>
-          <option value="">সব ধরনের সংগঠন</option>
-          {TYPES.map((t) => (
-            <option key={t} value={t}>{t}</option>
+          <option value="">{t("orgList.anyType")}</option>
+          {TYPES.map((typeOption) => (
+            <option key={typeOption} value={typeOption}>{typeOption}</option>
           ))}
         </select>
         <button type="submit" className="btn-primary justify-center">
-          <FiSearch /> খুঁজুন
+          <FiSearch /> {t("common.search")}
         </button>
       </form>
 
@@ -74,7 +75,7 @@ export default function OrganizationsList() {
 
       {!loading && organizations.length === 0 && (
         <div className="glass-card p-12 text-center text-gray-500 dark:text-gray-400">
-          কোনো সংগঠন পাওয়া যায়নি।
+          {t("orgList.noResults")}
         </div>
       )}
 
