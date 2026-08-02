@@ -268,12 +268,24 @@ export const respondToRequest = async (req, res, next) => {
       );
     } else {
       const rejectedByUids = Array.from(new Set([...(request.rejectedByUids || []), req.user.id]));
-      await requestRef.update({ rejectedByUids, updatedAt: FieldValue.serverTimestamp() });
+      const notifiedDonorUids = request.notifiedDonorUids || [];
+
+      // If this was a direct request to just this one donor, or every donor
+      // who was ever notified about a broadcast/emergency request has now
+      // declined, there's nobody left who could still accept it — resolve
+      // it to a terminal "rejected" state so it moves out of "My Requests"
+      // and into Request History instead of sitting as "pending" forever.
+      const noOneLeft = notifiedDonorUids.length > 0 && notifiedDonorUids.every((id) => rejectedByUids.includes(id));
+      const nextStatus = noOneLeft ? "rejected" : "pending";
+
+      await requestRef.update({ rejectedByUids, status: nextStatus, updatedAt: FieldValue.serverTimestamp() });
 
       await notify(
         request.seekerUid,
         "rejected",
-        `একজন ডোনার আপনার রিকোয়েস্ট প্রত্যাখ্যান করেছেন — অন্য ডোনাররা এখনো দেখতে পাচ্ছেন।`,
+        noOneLeft
+          ? `আপনার ${request.bloodGroup} রক্তের রিকোয়েস্টটি ডোনার(রা) গ্রহণ করেননি — এটি এখন আপনার Request History তে পাবেন।`
+          : `একজন ডোনার আপনার রিকোয়েস্ট প্রত্যাখ্যান করেছেন — অন্য ডোনাররা এখনো দেখতে পাচ্ছেন।`,
         request.id
       );
     }

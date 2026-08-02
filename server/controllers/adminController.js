@@ -15,8 +15,12 @@ const sortByDateDesc = (items, field = "createdAt") =>
 export const getAnalytics = async (req, res, next) => {
   try {
     const [users, requests] = await Promise.all([loadUsers(), loadRequests()]);
+    // Exclude admins AND accounts that never finished their profile (e.g.
+    // a Google sign-up that never completed the follow-up step) — those
+    // have no real bloodGroup yet and would otherwise show up as a
+    // confusing "undefined" bucket in the chart.
     const bloodGroupCounts = users
-      .filter((user) => user.role !== "admin")
+      .filter((user) => user.role !== "admin" && user.profileComplete !== false && user.bloodGroup)
       .reduce((accumulator, user) => {
         accumulator[user.bloodGroup] = (accumulator[user.bloodGroup] || 0) + 1;
         return accumulator;
@@ -48,16 +52,31 @@ export const getDashboardStats = async (req, res, next) => {
     ]);
 
     const visibleUsers = users.filter((user) => user.role !== "admin");
-    const totalUsers = visibleUsers.length;
-    const totalDonors = visibleUsers.filter((user) => user.activeMode === "donor").length;
-    const totalSeekers = visibleUsers.filter((user) => user.activeMode === "seeker").length;
+    // Only count accounts that actually finished registering — an
+    // incomplete Google sign-up (no blood group/district/phone yet) isn't
+    // a real functioning donor or seeker, so it shouldn't inflate these
+    // numbers. It's still tracked separately so admins can see/clean these up.
+    const completeUsers = visibleUsers.filter((user) => user.profileComplete !== false);
+    const incompleteProfiles = visibleUsers.length - completeUsers.length;
+
+    const totalUsers = completeUsers.length;
+    const totalDonors = completeUsers.filter((user) => user.activeMode === "donor").length;
+    const totalSeekers = completeUsers.filter((user) => user.activeMode === "seeker").length;
     const pendingRequests = requests.filter((request) => request.status === "pending").length;
     const completedDonations = donationHistory.length;
     const totalOrganizations = organizations.length;
 
     res.json({
       success: true,
-      stats: { totalUsers, totalDonors, totalSeekers, pendingRequests, completedDonations, totalOrganizations },
+      stats: {
+        totalUsers,
+        totalDonors,
+        totalSeekers,
+        pendingRequests,
+        completedDonations,
+        totalOrganizations,
+        incompleteProfiles,
+      },
     });
   } catch (err) {
     next(err);
@@ -96,6 +115,10 @@ export const toggleVerifyUser = async (req, res, next) => {
     if (!user) {
       res.status(404);
       throw new Error("User not found");
+    }
+    if (user.profileComplete === false) {
+      res.status(409);
+      throw new Error("This account hasn't finished registration yet — it can't be verified.");
     }
 
     const isVerified = !user.isVerified;
@@ -143,7 +166,7 @@ export const getAllRequests = async (req, res, next) => {
 export const updateRequestStatus = async (req, res, next) => {
   try {
     const { status } = req.body;
-    if (!["pending", "accepted", "completed", "cancelled"].includes(status)) {
+    if (!["pending", "accepted", "completed", "cancelled", "rejected"].includes(status)) {
       res.status(400);
       throw new Error("Invalid status");
     }
