@@ -5,10 +5,12 @@ import { FiLoader } from "react-icons/fi";
 import { sendPasswordResetEmail } from "firebase/auth";
 import { auth } from "../../config/firebase.js";
 import { useAuth } from "../../context/AuthContext.jsx";
+import { useLanguage } from "../../context/LanguageContext.jsx";
 import { deleteMyAccount } from "../../services/userService.js";
 
 export default function AccountSettings() {
   const { user, logout } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [sending, setSending] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -45,19 +47,17 @@ export default function AccountSettings() {
   return (
     <div className="max-w-2xl space-y-6">
       <div className="glass-card p-6">
-        <h3 className="mb-1 font-semibold text-gray-900 dark:text-white">Update Password</h3>
-        <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
-          আপনার ইমেইলে একটি পাসওয়ার্ড রিসেট লিংক পাঠানো হবে।
-        </p>
+        <h3 className="mb-1 font-semibold text-gray-900 dark:text-white">{t("settings.resetPasswordTitle")}</h3>
+        <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">{t("settings.resetPasswordDesc")}</p>
         <button onClick={handlePasswordReset} disabled={sending} className="btn-primary">
-          {sending ? <FiLoader className="animate-spin" /> : "Send Reset Link"}
+          {sending ? <FiLoader className="animate-spin" /> : t("settings.sendResetLink")}
         </button>
       </div>
 
       <div className="glass-card border border-red-200 p-6 dark:border-red-900/50">
-        <h3 className="mb-1 font-semibold text-red-600">Delete Account</h3>
+        <h3 className="mb-1 font-semibold text-red-600">{t("settings.dangerZone")}</h3>
         <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
-          এই কাজটি স্থায়ী — আপনার সব তথ্য মুছে যাবে। নিশ্চিত করতে নিচে <b>DELETE</b> লিখুন।
+          {t("settings.deleteAccountDesc")} {t("settings.typeToConfirm")}: <b>DELETE</b>
         </p>
         <input
           value={confirmText}
@@ -70,7 +70,7 @@ export default function AccountSettings() {
           disabled={confirmText !== "DELETE" || deleting}
           className="flex items-center gap-2 rounded-full bg-red-600 px-6 py-2.5 text-sm font-semibold text-white disabled:opacity-40"
         >
-          {deleting ? <FiLoader className="animate-spin" /> : "Delete My Account"}
+          {deleting ? <FiLoader className="animate-spin" /> : t("settings.deleteAccount")}
         </button>
       </div>
     </div>

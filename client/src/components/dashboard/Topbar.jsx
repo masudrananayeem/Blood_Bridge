@@ -8,11 +8,13 @@ import ThemeToggle from "../common/ThemeToggle.jsx";
 import LanguageToggle from "../common/LanguageToggle.jsx";
 import RoleSwitch from "./RoleSwitch.jsx";
 import { getNotifications, markAsRead } from "../../services/notificationService.js";
+import { useLanguage } from "../../context/LanguageContext.jsx";
 
 const iconFor = { request: FiBell, accepted: FiCheckCircle, rejected: FiXCircle, verified: FiShield, filled: FiXCircle };
 
 export default function Topbar({ onMenuClick }) {
   const { user, logout } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
@@ -46,7 +48,7 @@ export default function Topbar({ onMenuClick }) {
 
   const handleLogout = async () => {
     await logout();
-    toast.success("লগআউট হয়েছে");
+    toast.success(t("common.loggedOut"));
     navigate("/");
   };
 
@@ -107,11 +109,11 @@ export default function Topbar({ onMenuClick }) {
                 className="glass-card absolute right-0 z-20 mt-2 w-80 overflow-hidden !rounded-xl p-0"
               >
                 <div className="border-b border-gray-100 px-4 py-3 dark:border-white/10">
-                  <p className="text-sm font-semibold text-gray-900 dark:text-white">Notifications</p>
+                  <p className="text-sm font-semibold text-gray-900 dark:text-white">{t("sidebar.notifications")}</p>
                 </div>
 
                 {recentNotifications.length === 0 ? (
-                  <p className="px-4 py-6 text-center text-sm text-gray-400">এখনো কোনো নোটিফিকেশন নেই।</p>
+                  <p className="px-4 py-6 text-center text-sm text-gray-400">{t("notifications.empty")}</p>
                 ) : (
                   <div className="max-h-80 overflow-y-auto">
                     {recentNotifications.map((n) => {
@@ -141,7 +143,7 @@ export default function Topbar({ onMenuClick }) {
                   onClick={goToNotifications}
                   className="block w-full bg-gray-50 px-4 py-2.5 text-center text-xs font-semibold text-brand-600 hover:bg-gray-100 dark:bg-white/5 dark:hover:bg-white/10"
                 >
-                  সব নোটিফিকেশন দেখুন
+                  {t("notifications.viewAll")}
                 </button>
               </motion.div>
             )}
@@ -182,7 +184,7 @@ export default function Topbar({ onMenuClick }) {
                   onClick={handleLogout}
                   className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30"
                 >
-                  <FiLogOut size={16} /> Logout
+                  <FiLogOut size={16} /> {t("nav.logout")}
                 </button>
               </motion.div>
             )}
