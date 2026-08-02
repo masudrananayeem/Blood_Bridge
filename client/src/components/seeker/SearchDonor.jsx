@@ -5,6 +5,7 @@ import { FiSearch, FiShield, FiBookmark, FiSend, FiMapPin, FiNavigation } from "
 import bloodGroups from "../../utils/bloodGroups.js";
 import districts from "../../utils/districts.js";
 import { searchDonors, toggleSavedDonor } from "../../services/userService.js";
+import { useLanguage } from "../../context/LanguageContext.jsx";
 import SendRequestModal from "./SendRequestModal.jsx";
 import Loader from "../common/Loader.jsx";
 
@@ -14,6 +15,7 @@ import Loader from "../common/Loader.jsx";
 // pre-masked from the backend — full contact is only ever revealed once
 // that donor accepts an actual request.
 export default function SearchDonor() {
+  const { t } = useLanguage();
   const [filters, setFilters] = useState({ bloodGroup: "", district: "", upazila: "" });
   const [nearMe, setNearMe] = useState(true);
   const [donors, setDonors] = useState([]);
@@ -75,7 +77,7 @@ export default function SearchDonor() {
     <div className="space-y-6">
       <form onSubmit={handleSearch} className="glass-card grid grid-cols-1 gap-4 p-5 sm:grid-cols-5">
         <select name="bloodGroup" value={filters.bloodGroup} onChange={handleChange} className={inputClass}>
-          <option value="">যেকোনো Blood Group</option>
+          <option value="">{t("common.anyBloodGroup")}</option>
           {bloodGroups.map((g) => (
             <option key={g} value={g}>{g}</option>
           ))}
@@ -90,7 +92,7 @@ export default function SearchDonor() {
           }}
           className={inputClass}
         >
-          <option value="">যেকোনো District</option>
+          <option value="">{t("common.anyDistrict")}</option>
           {districts.map((d) => (
             <option key={d} value={d}>{d}</option>
           ))}
@@ -113,11 +115,11 @@ export default function SearchDonor() {
               : "border-gray-200 text-gray-600 dark:border-white/10 dark:text-gray-300"
           }`}
         >
-          <FiNavigation size={14} /> Near Me
+          <FiNavigation size={14} /> {t("common.nearMe")}
         </button>
 
         <button type="submit" className="btn-primary justify-center">
-          <FiSearch /> Search
+          <FiSearch /> {t("common.search")}
         </button>
       </form>
 
@@ -125,7 +127,7 @@ export default function SearchDonor() {
 
       {!loading && donors.length === 0 && (
         <div className="glass-card p-12 text-center text-gray-500 dark:text-gray-400">
-          কোনো Active ডোনার পাওয়া যায়নি — ফিল্টার পরিবর্তন করে আবার চেষ্টা করুন।
+          {t("search.noResults")}
         </div>
       )}
 
@@ -184,13 +186,13 @@ export default function SearchDonor() {
                 onClick={() => handleSave(d.id)}
                 className="flex flex-1 items-center justify-center gap-2 rounded-full border border-gray-200 py-2 text-xs font-semibold text-gray-600 dark:border-white/10 dark:text-gray-300"
               >
-                <FiBookmark size={14} /> {savedIds.has(d.id) ? "Saved" : "Save"}
+                <FiBookmark size={14} /> {savedIds.has(d.id) ? t("search.saved") : t("search.save")}
               </button>
               <button
                 onClick={() => setRequestingDonor(d)}
                 className="flex flex-1 items-center justify-center gap-2 rounded-full bg-brand-gradient py-2 text-xs font-semibold text-white"
               >
-                <FiSend size={14} /> Request
+                <FiSend size={14} /> {t("common.request")}
               </button>
             </div>
           </motion.div>

@@ -1,14 +1,17 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import toast from "react-hot-toast";
 import { FiLoader, FiX } from "react-icons/fi";
 import { createRequest } from "../../services/requestService.js";
+import Modal from "../common/Modal.jsx";
+import { useLanguage } from "../../context/LanguageContext.jsx";
 
 // donor: the target donor object (id, fullName, bloodGroup, district, upazila, ...)
 // onClose(): called to dismiss the modal
 // onSent(): called after a successful send, so the parent can refresh state
 export default function SendRequestModal({ donor, onClose, onSent }) {
+  const { t } = useLanguage();
   const [submitting, setSubmitting] = useState(false);
   const {
     register,
@@ -29,31 +32,24 @@ export default function SendRequestModal({ donor, onClose, onSent }) {
         upazila: donor.upazila,
         targetDonorUid: donor.id,
       });
-      toast.success(`${donor.fullName} কে রিকোয়েস্ট পাঠানো হয়েছে`);
+      toast.success(t("sendRequest.sentToastPrefix"));
       onSent?.();
       onClose();
     } catch (err) {
-      toast.error(err?.response?.data?.message || "রিকোয়েস্ট পাঠানো যায়নি");
+      toast.error(err?.response?.data?.message || t("sendRequest.sendFailed"));
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-        onClick={onClose}
-      >
+    <Modal onClose={onClose}>
         <motion.div
           initial={{ opacity: 0, y: 20, scale: 0.97 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 10, scale: 0.97 }}
+          transition={{ duration: 0.2 }}
           onClick={(e) => e.stopPropagation()}
-          className="glass-card w-full max-w-lg space-y-4 p-6"
+          className="glass-card max-h-[90vh] w-full max-w-lg space-y-4 overflow-y-auto p-6"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -92,7 +88,7 @@ export default function SendRequestModal({ donor, onClose, onSent }) {
               <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Hospital</label>
               <input
                 {...register("hospital", { required: true })}
-                placeholder="হাসপাতালের নাম"
+                placeholder={t("emergency.hospital")}
                 className={`${inputClass} ${errors.hospital ? "border-red-400" : ""}`}
               />
             </div>
@@ -108,12 +104,12 @@ export default function SendRequestModal({ donor, onClose, onSent }) {
 
             <div>
               <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Message to {donor.fullName} (ঐচ্ছিক)
+                {t("sendRequest.messageTo")} {donor.fullName} ({t("sendRequest.optional")})
               </label>
               <textarea
                 {...register("message")}
                 rows={3}
-                placeholder="আপনার পরিস্থিতি সংক্ষেপে লিখুন..."
+                placeholder={t("sendRequest.messagePlaceholder")}
                 className={inputClass}
               />
             </div>
@@ -123,7 +119,6 @@ export default function SendRequestModal({ donor, onClose, onSent }) {
             </button>
           </form>
         </motion.div>
-      </motion.div>
-    </AnimatePresence>
+    </Modal>
   );
 }

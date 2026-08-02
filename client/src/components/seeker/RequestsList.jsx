@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import toast from "react-hot-toast";
 import { FiMapPin, FiCalendar, FiX } from "react-icons/fi";
 import { getMyRequests, cancelRequest } from "../../services/requestService.js";
+import { useLanguage } from "../../context/LanguageContext.jsx";
 import Loader from "../common/Loader.jsx";
 
 const statusStyle = {
@@ -10,13 +11,16 @@ const statusStyle = {
   accepted: "bg-blue-50 text-blue-600 dark:bg-blue-950/40",
   completed: "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40",
   cancelled: "bg-gray-100 text-gray-500 dark:bg-white/10",
+  rejected: "bg-red-50 text-red-500 dark:bg-red-950/40",
 };
 
 // statuses: array of statuses to include, e.g. ["pending","accepted"] for
 // "My Requests" or ["completed","cancelled"] for "Request History"
 export default function RequestsList({ statuses, emptyText }) {
+  const { t } = useLanguage();
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [cancellingId, setCancellingId] = useState(null);
 
   const load = () => {
     setLoading(true);
@@ -29,21 +33,30 @@ export default function RequestsList({ statuses, emptyText }) {
   useEffect(load, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleCancel = async (id) => {
+    setCancellingId(id);
     try {
       await cancelRequest(id);
-      toast.success("রিকোয়েস্ট বাতিল করা হয়েছে");
+      toast.success(t("myRequests.cancelledToast"));
       load();
     } catch {
-      toast.error("বাতিল করা যায়নি");
+      toast.error(t("myRequests.cancelFailed"));
+    } finally {
+      setCancellingId(null);
     }
+  };
+
+  const statusLabel = {
+    pending: t("myRequests.pending"),
+    accepted: t("myRequests.accepted"),
+    completed: t("myRequests.completed"),
+    cancelled: t("myRequests.cancelled"),
+    rejected: t("myRequests.cancelled"),
   };
 
   if (loading) return <Loader />;
 
   if (requests.length === 0) {
-    return (
-      <div className="glass-card p-12 text-center text-gray-500 dark:text-gray-400">{emptyText}</div>
-    );
+    return <div className="glass-card p-12 text-center text-gray-500 dark:text-gray-400">{emptyText}</div>;
   }
 
   return (
@@ -53,27 +66,27 @@ export default function RequestsList({ statuses, emptyText }) {
           key={r.id}
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: i * 0.05 }}
+          transition={{ duration: 0.3, delay: Math.min(i * 0.05, 0.3) }}
           className="glass-card p-5"
         >
           <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
             <div className="flex flex-wrap items-center gap-2">
               <span className="rounded-full bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-700 dark:bg-brand-950/50 dark:text-brand-300">
-                {r.bloodGroup} · {r.units} unit(s)
+                {r.bloodGroup} · {r.units} {t("myRequests.units")}
               </span>
               {r.isEmergency && (
                 <span className="rounded-full bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-600 dark:bg-red-950/40">
-                  🚨 Emergency
+                  🚨 {t("incoming.emergency")}
                 </span>
               )}
               {r.targetDonorUid && (
                 <span className="rounded-full bg-purple-50 px-2.5 py-1 text-xs font-semibold text-purple-600 dark:bg-purple-950/40">
-                  Direct → {r.targetDonorName}
+                  {t("incoming.direct")} → {r.targetDonorName}
                 </span>
               )}
             </div>
-            <span className={`rounded-full px-2.5 py-1 text-xs font-semibold capitalize ${statusStyle[r.status]}`}>
-              {r.status}
+            <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${statusStyle[r.status]}`}>
+              {statusLabel[r.status] || r.status}
             </span>
           </div>
 
@@ -81,7 +94,7 @@ export default function RequestsList({ statuses, emptyText }) {
             <FiMapPin size={14} /> {r.hospital}, {r.upazila}, {r.district}
           </p>
           <p className="flex items-center gap-1 text-xs text-gray-400">
-            <FiCalendar size={12} /> Needed by {new Date(r.neededByDate).toLocaleDateString()}
+            <FiCalendar size={12} /> {t("myRequests.neededBy")} {new Date(r.neededByDate).toLocaleDateString()}
           </p>
 
           {r.message && (
@@ -93,16 +106,21 @@ export default function RequestsList({ statuses, emptyText }) {
           {r.acceptedDonorUid && (
             <p className="mt-2 text-xs font-medium text-emerald-600">
               ✓ {r.acceptedDonorName} ({r.acceptedDonorPhone}
-              {r.acceptedDonorEmail ? `, ${r.acceptedDonorEmail}` : ""}) accepted this request — contact them directly.
+              {r.acceptedDonorEmail ? `, ${r.acceptedDonorEmail}` : ""}) {t("myRequests.contactRevealed")}
             </p>
+          )}
+
+          {r.status === "rejected" && (
+            <p className="mt-2 text-xs font-medium text-red-500">✕ {t("myRequests.noneAccepted")}</p>
           )}
 
           {r.status === "pending" && (
             <button
               onClick={() => handleCancel(r.id)}
-              className="mt-3 flex items-center gap-1 text-xs font-semibold text-red-500 hover:underline"
+              disabled={cancellingId === r.id}
+              className="mt-3 flex items-center gap-1 text-xs font-semibold text-red-500 hover:underline disabled:opacity-50"
             >
-              <FiX size={14} /> Cancel Request
+              <FiX size={14} /> {t("myRequests.cancel")}
             </button>
           )}
         </motion.div>

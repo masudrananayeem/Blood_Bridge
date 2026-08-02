@@ -6,8 +6,10 @@ import { FiLoader, FiAlertTriangle } from "react-icons/fi";
 import bloodGroups from "../../utils/bloodGroups.js";
 import districts from "../../utils/districts.js";
 import { createRequest } from "../../services/requestService.js";
+import { useLanguage } from "../../context/LanguageContext.jsx";
 
 export default function EmergencyRequestForm() {
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
 
@@ -47,7 +49,7 @@ export default function EmergencyRequestForm() {
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Blood Group</label>
+          <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("common.bloodGroup")}</label>
           <select {...register("bloodGroup", { required: true })} className={`${inputClass} ${errors.bloodGroup ? errClass : ""}`}>
             <option value="">বেছে নিন</option>
             {bloodGroups.map((g) => (
@@ -56,7 +58,7 @@ export default function EmergencyRequestForm() {
           </select>
         </div>
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Units Needed</label>
+          <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("emergency.units")}</label>
           <input
             type="number"
             min={1}
@@ -67,7 +69,7 @@ export default function EmergencyRequestForm() {
       </div>
 
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Hospital</label>
+        <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("emergency.hospital")}</label>
         <input
           {...register("hospital", { required: true })}
           placeholder="হাসপাতালের নাম"
@@ -77,7 +79,7 @@ export default function EmergencyRequestForm() {
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">District</label>
+          <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("common.district")}</label>
           <select {...register("district", { required: true })} className={`${inputClass} ${errors.district ? errClass : ""}`}>
             <option value="">বেছে নিন</option>
             {districts.map((d) => (
@@ -86,7 +88,7 @@ export default function EmergencyRequestForm() {
           </select>
         </div>
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Upazila</label>
+          <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("common.upazila")}</label>
           <input
             {...register("upazila", { required: true })}
             className={`${inputClass} ${errors.upazila ? errClass : ""}`}
@@ -96,7 +98,7 @@ export default function EmergencyRequestForm() {
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Urgency</label>
+          <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("emergency.urgency")}</label>
           <select {...register("urgency", { required: true })} className={inputClass}>
             <option value="High">High</option>
             <option value="Medium">Medium</option>
@@ -104,7 +106,7 @@ export default function EmergencyRequestForm() {
           </select>
         </div>
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Needed By</label>
+          <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("emergency.neededBy")}</label>
           <input
             type="date"
             {...register("neededByDate", { required: true })}
@@ -114,13 +116,13 @@ export default function EmergencyRequestForm() {
       </div>
 
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Reason (ঐচ্ছিক)</label>
+        <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("emergency.reason")}</label>
         <textarea {...register("reason")} rows={2} placeholder="সংক্ষেপে কারণ লিখুন" className={inputClass} />
       </div>
 
       <div>
         <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
-          Message to Donors (ঐচ্ছিক)
+          {t("emergency.message")}
         </label>
         <textarea
           {...register("message")}
@@ -131,7 +133,7 @@ export default function EmergencyRequestForm() {
       </div>
 
       <button type="submit" disabled={submitting} className="btn-primary w-full justify-center">
-        {submitting ? <FiLoader className="animate-spin" /> : "Submit Emergency Request"}
+        {submitting ? <FiLoader className="animate-spin" /> : t("emergency.submit")}
       </button>
     </form>
   );

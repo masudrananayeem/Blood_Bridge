@@ -4,8 +4,10 @@ import { FiShield, FiBookmark, FiSend } from "react-icons/fi";
 import { getSavedDonors, toggleSavedDonor } from "../../services/userService.js";
 import SendRequestModal from "./SendRequestModal.jsx";
 import Loader from "../common/Loader.jsx";
+import { useLanguage } from "../../context/LanguageContext.jsx";
 
 export default function SavedDonorsList() {
+  const { t } = useLanguage();
   const [donors, setDonors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [requestingDonor, setRequestingDonor] = useState(null);
@@ -24,9 +26,9 @@ export default function SavedDonorsList() {
     try {
       await toggleSavedDonor(id);
       setDonors((prev) => prev.filter((d) => d.id !== id));
-      toast.success("তালিকা থেকে সরানো হয়েছে");
+      toast.success(t("saved.removedToast"));
     } catch {
-      toast.error("সরানো যায়নি");
+      toast.error(t("saved.removeFailed"));
     }
   };
 
@@ -36,7 +38,7 @@ export default function SavedDonorsList() {
     return (
       <div className="glass-card flex flex-col items-center gap-3 p-12 text-center">
         <FiBookmark size={28} className="text-brand-300" />
-        <p className="text-gray-500 dark:text-gray-400">এখনো কোনো ডোনার সেভ করা হয়নি।</p>
+        <p className="text-gray-500 dark:text-gray-400">{t("saved.empty")}</p>
       </div>
     );
   }
@@ -70,7 +72,7 @@ export default function SavedDonorsList() {
             </span>
             {d.daysUntilEligible > 0 ? (
               <span className="inline-block rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-600 dark:bg-amber-950/40">
-                🩸 আবার Available: {d.daysUntilEligible} দিন পর
+                🩸 {t("saved.availableAgain")}: {d.daysUntilEligible} {t("availability.days")}
               </span>
             ) : !d.isAvailable ? (
               <span className="inline-block rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-500 dark:bg-white/10">
@@ -96,7 +98,7 @@ export default function SavedDonorsList() {
             <button
               onClick={() => setRequestingDonor(d)}
               disabled={!d.isAvailable}
-              title={!d.isAvailable ? "এই ডোনার এই মুহূর্তে Unavailable" : ""}
+              title={!d.isAvailable ? t("saved.currentlyUnavailable") : ""}
               className="flex flex-1 items-center justify-center gap-2 rounded-full bg-brand-gradient py-2 text-xs font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40"
             >
               <FiSend size={14} /> Request
