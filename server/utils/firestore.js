@@ -8,6 +8,7 @@ export const collections = {
     donationHistory: db.collection("donationHistory"),
     notifications: db.collection("notifications"),
     organizations: db.collection("organizations"),
+    feedback: db.collection("feedback"),
 };
 
 const isTimestamp = (value) => value instanceof admin.firestore.Timestamp;

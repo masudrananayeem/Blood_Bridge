@@ -5,10 +5,11 @@ import { collections, serializeDocs } from "./firestore.js";
 // account. Shared by the admin "delete user" action and the user's own
 // "Delete Account" (Account Settings) action.
 export const deleteUserCascade = async (admin, user) => {
-  const [requests, donationHistory, notifications] = await Promise.all([
+  const [requests, donationHistory, notifications, feedback] = await Promise.all([
     serializeDocs(await collections.requests.get()),
     serializeDocs(await collections.donationHistory.get()),
     serializeDocs(await collections.notifications.get()),
+    serializeDocs(await collections.feedback.get()),
   ]);
 
   const deletions = [];
@@ -31,6 +32,11 @@ export const deleteUserCascade = async (admin, user) => {
   notifications.forEach((notification) => {
     if (notification.recipientUid === user.id) {
       deletions.push(collections.notifications.doc(notification.id).delete());
+    }
+  });
+  feedback.forEach((item) => {
+    if (item.userUid === user.id) {
+      deletions.push(collections.feedback.doc(item.id).delete());
     }
   });
 
