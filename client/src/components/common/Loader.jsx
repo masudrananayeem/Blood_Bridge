@@ -3,7 +3,7 @@ export default function Loader({ fullScreen = false }) {
     <div
       className={
         fullScreen
-          ? "flex min-h-screen items-center justify-center bg-white dark:bg-surface-dark"
+          ? "flex min-h-screen min-h-[100dvh] items-center justify-center bg-white dark:bg-surface-dark"
           : "flex items-center justify-center py-16"
       }
     >
