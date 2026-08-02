@@ -1,9 +1,11 @@
 import { motion } from "framer-motion";
 import Logo from "../common/Logo.jsx";
+import { useLanguage } from "../../context/LanguageContext.jsx";
 
 export default function AuthLayout({ title, subtitle, children }) {
+  const { t } = useLanguage();
   return (
-    <div className="grid min-h-screen grid-cols-1 lg:grid-cols-2">
+    <div className="grid min-h-screen min-h-[100dvh] grid-cols-1 lg:grid-cols-2">
       {/* Brand panel — hidden on small screens */}
       <div className="relative hidden flex-col justify-between overflow-hidden bg-brand-gradient p-10 text-white lg:flex">
         <div className="pointer-events-none absolute inset-0">
@@ -20,11 +22,9 @@ export default function AuthLayout({ title, subtitle, children }) {
           className="relative"
         >
           <h2 className="text-3xl font-bold leading-snug">
-            প্রতিটি রক্তদান, <br /> একটি জীবনের গল্প।
+            {t("hero.title")} <br /> {t("hero.titleHighlight")}
           </h2>
-          <p className="mt-4 max-w-sm text-brand-50/90">
-            হাজারো ভেরিফায়েড ডোনার ও সিকারের নিরাপদ নেটওয়ার্কে যুক্ত হোন।
-          </p>
+          <p className="mt-4 max-w-sm text-brand-50/90">{t("auth.brandSubtitle")}</p>
         </motion.div>
 
         <p className="relative text-sm text-brand-50/70">© {new Date().getFullYear()} BloodBridge</p>
