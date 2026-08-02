@@ -1,8 +1,10 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { FiArrowRight } from "react-icons/fi";
+import { useLanguage } from "../../context/LanguageContext.jsx";
 
 export default function CTA() {
+  const { t } = useLanguage();
   return (
     <section className="px-4 sm:px-6 lg:px-8">
       <motion.div
@@ -18,16 +20,14 @@ export default function CTA() {
         </div>
 
         <h2 className="relative text-3xl font-extrabold text-white sm:text-4xl">
-          Become a Hero Today
+          {t("landing.ctaTitle")}
         </h2>
-        <p className="relative mx-auto mt-4 max-w-xl text-brand-50/90">
-          একটা অ্যাকাউন্ট, দুইটা ভূমিকা — Donor অথবা Seeker, যখন যেমন প্রয়োজন।
-        </p>
+        <p className="relative mx-auto mt-4 max-w-xl text-brand-50/90">{t("landing.ctaSubtitle")}</p>
         <Link
           to="/login"
           className="relative mt-8 inline-flex items-center gap-2 rounded-full bg-white px-8 py-3 font-semibold text-brand-700 shadow-lg transition-transform duration-200 hover:scale-105"
         >
-          Login <FiArrowRight />
+          {t("landing.ctaButton")} <FiArrowRight />
         </Link>
       </motion.div>
     </section>

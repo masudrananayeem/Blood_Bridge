@@ -3,11 +3,6 @@ import { FiFacebook, FiTwitter, FiInstagram, FiLinkedin } from "react-icons/fi";
 import Logo from "../common/Logo.jsx";
 import { useLanguage } from "../../context/LanguageContext.jsx";
 
-const legalLinks = [
-  { label: "Privacy Policy", to: "/privacy-policy" },
-  { label: "Terms of Service", to: "/terms" },
-];
-
 const socials = [
   { icon: FiFacebook, href: "#" },
   { icon: FiTwitter, href: "#" },
@@ -18,11 +13,16 @@ const socials = [
 export default function Footer() {
   const { t } = useLanguage();
 
+  const legalLinks = [
+    { label: t("footer.privacyPolicy"), to: "/privacy-policy" },
+    { label: t("footer.termsOfService"), to: "/terms" },
+  ];
+
   const quickLinks = [
     { label: t("nav.home"), to: "/" },
     { label: t("nav.login"), to: "/login" },
     { label: t("nav.register"), to: "/register" },
-    { label: "How It Works", to: "/#how-it-works" },
+    { label: t("footer.howItWorks"), to: "/#how-it-works" },
   ];
 
   return (
@@ -54,7 +54,7 @@ export default function Footer() {
 
           <div>
             <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-900 dark:text-white">
-              Legal
+              {t("footer.legal")}
             </h4>
             <ul className="space-y-2">
               {legalLinks.map((l) => (

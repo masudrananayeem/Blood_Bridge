@@ -1,28 +1,11 @@
 import { motion } from "framer-motion";
 import { FiStar } from "react-icons/fi";
-
-const testimonials = [
-  {
-    name: "রফিকুল ইসলাম",
-    role: "নিয়মিত ডোনার",
-    quote:
-      "BloodBridge এর মাধ্যমে আমি জরুরি মুহূর্তে দ্রুত হাসপাতালে পৌঁছাতে পেরেছিলাম। প্ল্যাটফর্মটা সত্যিই জীবন বাঁচায়।",
-  },
-  {
-    name: "সুমাইয়া আক্তার",
-    role: "Blood Seeker",
-    quote:
-      "আমার বাবার অপারেশনের সময় মাত্র ২০ মিনিটে কাছাকাছি একজন ডোনার খুঁজে পেয়েছিলাম। অসাধারণ অভিজ্ঞতা।",
-  },
-  {
-    name: "ডা. তানভীর আহমেদ",
-    role: "মেডিকেল অফিসার",
-    quote:
-      "ভেরিফায়েড ডোনার সিস্টেমটা হাসপাতালের জন্য নির্ভরযোগ্য একটা রিসোর্স হয়ে উঠেছে।",
-  },
-];
+import { useLanguage } from "../../context/LanguageContext.jsx";
 
 export default function Testimonials() {
+  const { t } = useLanguage();
+  const testimonials = t("landing.testimonialsList");
+
   return (
     <section className="section-container">
       <motion.div
@@ -33,7 +16,7 @@ export default function Testimonials() {
         className="mx-auto mb-14 max-w-2xl text-center"
       >
         <h2 className="text-3xl font-bold text-gray-900 dark:text-white sm:text-4xl">
-          মানুষ কী বলছেন
+          {t("landing.testimonialsTitle")}
         </h2>
       </motion.div>
 

@@ -1,29 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiChevronDown } from "react-icons/fi";
-
-const faqs = [
-  {
-    q: "রক্তদানের জন্য বয়স ও ওজন কত হতে হবে?",
-    a: "সাধারণত ১৮-৬০ বছর বয়সী এবং কমপক্ষে ৫০ কেজি ওজনের সুস্থ ব্যক্তি রক্ত দিতে পারেন।",
-  },
-  {
-    q: "কতদিন পরপর রক্ত দেওয়া যায়?",
-    a: "পুরুষরা প্রতি ৩ মাসে এবং নারীরা প্রতি ৪ মাসে একবার রক্ত দিতে পারেন।",
-  },
-  {
-    q: "BloodBridge এ কীভাবে ডোনার খুঁজব?",
-    a: "Blood Group, District ও Upazila দিয়ে ফিল্টার করে আপনার কাছাকাছি ভেরিফায়েড ডোনার খুঁজে পাবেন।",
-  },
-  {
-    q: "আমার তথ্য কি নিরাপদ থাকবে?",
-    a: "হ্যাঁ। JWT অথেন্টিকেশন, এনক্রিপ্টেড পাসওয়ার্ড ও প্রোটেক্টেড API দিয়ে আপনার ডেটা সুরক্ষিত রাখা হয়।",
-  },
-  {
-    q: "জরুরি প্রয়োজনে কীভাবে রিকোয়েস্ট করব?",
-    a: "Seeker ড্যাশবোর্ড থেকে Emergency Request তৈরি করলে আশেপাশের ডোনাররা সাথে সাথে নোটিফিকেশন পাবেন।",
-  },
-];
+import { useLanguage } from "../../context/LanguageContext.jsx";
 
 function FaqItem({ faq, isOpen, onClick }) {
   return (
@@ -61,6 +39,8 @@ function FaqItem({ faq, isOpen, onClick }) {
 }
 
 export default function FAQ() {
+  const { t } = useLanguage();
+  const faqs = t("landing.faqList");
   const [openIndex, setOpenIndex] = useState(0);
 
   return (
@@ -74,7 +54,7 @@ export default function FAQ() {
           className="mx-auto mb-12 max-w-2xl text-center"
         >
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white sm:text-4xl">
-            Frequently Asked Questions
+            {t("landing.faqTitle")}
           </h2>
         </motion.div>
 

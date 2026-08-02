@@ -1,8 +1,10 @@
 import { motion } from "framer-motion";
+import { useLanguage } from "../../context/LanguageContext.jsx";
 
 const groups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 
 export default function BloodGroups() {
+  const { t } = useLanguage();
   return (
     <section className="section-container">
       <motion.div
@@ -12,10 +14,8 @@ export default function BloodGroups() {
         transition={{ duration: 0.5 }}
         className="mx-auto mb-14 max-w-2xl text-center"
       >
-        <h2 className="text-3xl font-bold text-gray-900 dark:text-white sm:text-4xl">Blood Groups</h2>
-        <p className="mt-4 text-gray-500 dark:text-gray-400">
-          আপনার ব্লাড গ্রুপ বেছে নিয়ে এখনই সার্চ শুরু করুন।
-        </p>
+        <h2 className="text-3xl font-bold text-gray-900 dark:text-white sm:text-4xl">{t("landing.bloodGroupsTitle")}</h2>
+        <p className="mt-4 text-gray-500 dark:text-gray-400">{t("landing.bloodGroupsSubtitle")}</p>
       </motion.div>
 
       <div className="grid grid-cols-4 gap-4 sm:gap-6 lg:grid-cols-8">
