@@ -11,6 +11,7 @@ import requestRoutes from "./routes/requestRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
 import organizationRoutes from "./routes/organizationRoutes.js";
+import feedbackRoutes from "./routes/feedbackRoutes.js";
 
 dotenv.config();
 
@@ -54,6 +55,7 @@ app.use("/api/requests", requestRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/organizations", organizationRoutes);
+app.use("/api/feedback", feedbackRoutes);
 
 // ---- Error handling (always last) ----
 app.use(notFound);
