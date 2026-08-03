@@ -13,7 +13,7 @@ import Footer from "../components/landing/Footer.jsx";
 // Landing page complete — Steps 2, 3 & 4 combined.
 export default function LandingPage() {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen min-h-[100dvh]">
       <Navbar />
       <Hero />
       <WhyDonate />
