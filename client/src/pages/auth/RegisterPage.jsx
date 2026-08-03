@@ -7,6 +7,7 @@ import { FiLoader, FiUpload, FiMail, FiAlertTriangle } from "react-icons/fi";
 import AuthLayout from "../../components/auth/AuthLayout.jsx";
 import FormInput from "../../components/auth/FormInput.jsx";
 import { useAuth } from "../../context/AuthContext.jsx";
+import { useLanguage } from "../../context/LanguageContext.jsx";
 import { uploadProfileImage } from "../../services/uploadImage.js";
 import { registerProfile } from "../../services/authService.js";
 import { auth } from "../../config/firebase.js";
@@ -16,6 +17,7 @@ const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 
 export default function RegisterPage() {
   const { registerWithEmail, resendVerificationEmail, loginWithGoogle } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
@@ -111,19 +113,18 @@ export default function RegisterPage() {
 
   if (registeredEmail) {
     return (
-      <AuthLayout title="ইমেইল ভেরিফাই করুন" subtitle="একটা শেষ ধাপ বাকি">
+      <AuthLayout title={t("auth.verifyEmailTitle")} subtitle={t("auth.verifyEmailSubtitle")}>
         <div className="flex flex-col items-center gap-4 text-center">
           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-brand-50 text-brand-600 dark:bg-brand-950/40">
             <FiMail size={26} />
           </div>
           <p className="text-gray-700 dark:text-gray-200">
-            <span className="font-semibold">{registeredEmail}</span> এ একটি ভেরিফিকেশন ইমেইল পাঠানো হয়েছে।
-            অ্যাকাউন্ট সম্পূর্ণ ব্যবহার করতে ইমেইলে থাকা লিংকে ক্লিক করে ভেরিফাই করুন।
+            {t("auth.verifyEmailSentTo")} <span className="font-semibold">{registeredEmail}</span>. {t("auth.verifyEmailInstructions")}
           </p>
           <div className="flex w-full items-start gap-2 rounded-xl bg-amber-50 p-3 text-left text-sm text-amber-700 dark:bg-amber-950/30 dark:text-amber-400">
             <FiAlertTriangle className="mt-0.5 shrink-0" size={16} />
             <span>
-              ইমেইল খুঁজে না পেলে <b>Spam</b> বা <b>Junk</b> ফোল্ডার চেক করুন — মাঝে মাঝে ভেরিফিকেশন ইমেইল সেখানে চলে যায়।
+              {t("auth.checkSpam")} {t("auth.spamFolder")}
             </span>
           </div>
           <button
@@ -132,10 +133,10 @@ export default function RegisterPage() {
             className="flex items-center gap-2 text-sm font-semibold text-brand-600 hover:underline disabled:opacity-50"
           >
             {resending ? <FiLoader className="animate-spin" size={14} /> : null}
-            ইমেইল আবার পাঠান
+            {t("auth.resendEmail")}
           </button>
           <button onClick={() => navigate("/login")} className="btn-primary mt-2 w-full justify-center">
-            লগইন পেজে যান
+            {t("auth.goToLogin")}
           </button>
         </div>
       </AuthLayout>
@@ -143,19 +144,19 @@ export default function RegisterPage() {
   }
 
   return (
-    <AuthLayout title="অ্যাকাউন্ট তৈরি করুন" subtitle="একবার রেজিস্টার করে Donor ও Seeker — দুই ভূমিকাই ব্যবহার করুন">
+    <AuthLayout title={t("auth.createAccount")} subtitle={t("auth.createAccountSubtitle")}>
       <button
         onClick={handleGoogleSignup}
         disabled={googleLoading}
         className="mb-6 flex w-full items-center justify-center gap-3 rounded-full border border-gray-200 bg-white py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition-colors hover:bg-gray-50 dark:border-white/10 dark:bg-white/5 dark:text-gray-200"
       >
         {googleLoading ? <FiLoader className="animate-spin" /> : <FcGoogle size={20} />}
-        Google দিয়ে সাইন আপ করুন
+        {t("auth.signUpWithGoogle")}
       </button>
 
       <div className="mb-6 flex items-center gap-3 text-xs text-gray-400">
         <div className="h-px flex-1 bg-gray-200 dark:bg-white/10" />
-        অথবা ফর্ম পূরণ করুন
+        {t("auth.orFillForm")}
         <div className="h-px flex-1 bg-gray-200 dark:bg-white/10" />
       </div>
 
@@ -171,19 +172,19 @@ export default function RegisterPage() {
             <input type="file" accept="image/*" className="hidden" onChange={handlePhotoChange} />
           </label>
           <div className="text-sm text-gray-500 dark:text-gray-400">
-            প্রোফাইল ছবি আপলোড করুন <br /> (ঐচ্ছিক)
+            {t("auth.uploadPhoto")} <br /> {t("auth.optional")}
           </div>
         </div>
 
         <div className="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
           <FormInput
-            label="Full Name"
+            label={t("auth.fullName")}
             error={errors.fullName}
             registration={register("fullName", { required: "পূর্ণ নাম দিন" })}
-            placeholder="আপনার নাম"
+            placeholder={t("auth.fullNamePlaceholder")}
           />
           <FormInput
-            label="Phone Number"
+            label={t("auth.phoneNumber")}
             error={errors.phone}
             registration={register("phone", {
               required: "ফোন নম্বর দিন",
@@ -194,7 +195,7 @@ export default function RegisterPage() {
         </div>
 
         <FormInput
-          label="Email"
+          label={t("auth.email")}
           type="email"
           error={errors.email}
           registration={register("email", {
@@ -206,7 +207,7 @@ export default function RegisterPage() {
 
         <div className="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
           <FormInput
-            label="Password"
+            label={t("auth.password")}
             type="password"
             error={errors.password}
             registration={register("password", {
@@ -216,7 +217,7 @@ export default function RegisterPage() {
             placeholder="••••••••"
           />
           <FormInput
-            label="Confirm Password"
+            label={t("auth.confirmPassword")}
             type="password"
             error={errors.confirmPassword}
             registration={register("confirmPassword", {
@@ -228,32 +229,32 @@ export default function RegisterPage() {
         </div>
 
         <div className="grid grid-cols-1 gap-x-4 sm:grid-cols-3">
-          <FormInput label="Blood Group" error={errors.bloodGroup}>
+          <FormInput label={t("auth.bloodGroup")} error={errors.bloodGroup}>
             <select
               {...register("bloodGroup", { required: "ব্লাড গ্রুপ বেছে নিন" })}
               className="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:border-white/10 dark:bg-white/5 dark:text-white"
             >
-              <option value="">বেছে নিন</option>
+              <option value="">{t("auth.selectOption")}</option>
               {bloodGroups.map((g) => (
                 <option key={g} value={g}>{g}</option>
               ))}
             </select>
           </FormInput>
 
-          <FormInput label="Gender" error={errors.gender}>
+          <FormInput label={t("auth.gender")} error={errors.gender}>
             <select
               {...register("gender", { required: "লিঙ্গ বেছে নিন" })}
               className="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:border-white/10 dark:bg-white/5 dark:text-white"
             >
-              <option value="">বেছে নিন</option>
-              <option value="male">Male</option>
-              <option value="female">Female</option>
-              <option value="other">Other</option>
+              <option value="">{t("auth.selectOption")}</option>
+              <option value="male">{t("auth.male")}</option>
+              <option value="female">{t("auth.female")}</option>
+              <option value="other">{t("auth.other")}</option>
             </select>
           </FormInput>
 
           <FormInput
-            label="Date of Birth"
+            label={t("auth.dateOfBirth")}
             type="date"
             error={errors.dateOfBirth}
             registration={register("dateOfBirth", { required: "জন্ম তারিখ দিন" })}
@@ -261,12 +262,12 @@ export default function RegisterPage() {
         </div>
 
         <div className="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
-          <FormInput label="District" error={errors.district}>
+          <FormInput label={t("auth.district")} error={errors.district}>
             <select
               {...register("district", { required: "জেলা বেছে নিন" })}
               className="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:border-white/10 dark:bg-white/5 dark:text-white"
             >
-              <option value="">বেছে নিন</option>
+              <option value="">{t("auth.selectOption")}</option>
               {districts.map((d) => (
                 <option key={d} value={d}>{d}</option>
               ))}
@@ -274,29 +275,29 @@ export default function RegisterPage() {
           </FormInput>
 
           <FormInput
-            label="Upazila"
+            label={t("auth.upazila")}
             error={errors.upazila}
             registration={register("upazila", { required: "উপজেলা দিন" })}
-            placeholder="আপনার উপজেলা"
+            placeholder={t("auth.upazilaPlaceholder")}
           />
         </div>
 
         <FormInput
-          label="Present Address"
+          label={t("auth.presentAddress")}
           error={errors.address}
           registration={register("address", { required: "বর্তমান ঠিকানা দিন" })}
-          placeholder="বিস্তারিত ঠিকানা — এটি দিয়ে নিকটতম ডোনার/সিকার নির্ধারণ করা হবে"
+          placeholder={t("auth.addressPlaceholder")}
         />
 
         <button type="submit" disabled={submitting} className="btn-primary mt-2 w-full justify-center">
-          {submitting ? <FiLoader className="animate-spin" /> : "Create Account"}
+          {submitting ? <FiLoader className="animate-spin" /> : t("auth.createAccount")}
         </button>
       </form>
 
       <p className="mt-8 text-center text-sm text-gray-500 dark:text-gray-400">
-        আগে থেকেই অ্যাকাউন্ট আছে?{" "}
+        {t("auth.alreadyHaveAccount")}{" "}
         <Link to="/login" className="font-semibold text-brand-600 hover:underline">
-          লগইন করুন
+          {t("auth.login")}
         </Link>
       </p>
     </AuthLayout>

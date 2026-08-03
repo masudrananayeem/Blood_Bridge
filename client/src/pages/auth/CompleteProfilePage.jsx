@@ -7,6 +7,7 @@ import AuthLayout from "../../components/auth/AuthLayout.jsx";
 import FormInput from "../../components/auth/FormInput.jsx";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { updateProfile } from "../../services/userService.js";
+import { useLanguage } from "../../context/LanguageContext.jsx";
 import districts from "../../utils/districts.js";
 
 const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
@@ -17,6 +18,7 @@ const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 // person into the dashboard.
 export default function CompleteProfilePage() {
   const { user, setUser } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
 
@@ -44,20 +46,17 @@ export default function CompleteProfilePage() {
   };
 
   return (
-    <AuthLayout
-      title="প্রোফাইল সম্পূর্ণ করুন"
-      subtitle="Google দিয়ে সাইন আপ করায় কিছু জরুরি তথ্য বাকি আছে — এগুলো ছাড়া ডোনার/সিকার হিসেবে ব্যবহার করা যাবে না।"
-    >
+    <AuthLayout title={t("auth.completeProfileTitle")} subtitle={t("auth.completeProfileNote")}>
       <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
         <FormInput
-          label="Full Name"
+          label={t("auth.fullName")}
           error={errors.fullName}
           registration={register("fullName", { required: "পূর্ণ নাম দিন" })}
-          placeholder="আপনার নাম"
+          placeholder={t("auth.fullNamePlaceholder")}
         />
 
         <FormInput
-          label="Phone Number"
+          label={t("auth.phoneNumber")}
           error={errors.phone}
           registration={register("phone", {
             required: "ফোন নম্বর দিন",
@@ -67,9 +66,9 @@ export default function CompleteProfilePage() {
         />
 
         <div className="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
-          <FormInput label="Blood Group" error={errors.bloodGroup}>
+          <FormInput label={t("auth.bloodGroup")} error={errors.bloodGroup}>
             <select {...register("bloodGroup", { required: "ব্লাড গ্রুপ বেছে নিন" })} className={selectClass}>
-              <option value="">বেছে নিন</option>
+              <option value="">{t("auth.selectOption")}</option>
               {bloodGroups.map((g) => (
                 <option key={g} value={g}>{g}</option>
               ))}
@@ -77,7 +76,7 @@ export default function CompleteProfilePage() {
           </FormInput>
 
           <FormInput
-            label="Date of Birth"
+            label={t("auth.dateOfBirth")}
             type="date"
             error={errors.dateOfBirth}
             registration={register("dateOfBirth", { required: "জন্ম তারিখ দিন" })}
@@ -85,9 +84,9 @@ export default function CompleteProfilePage() {
         </div>
 
         <div className="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
-          <FormInput label="District" error={errors.district}>
+          <FormInput label={t("auth.district")} error={errors.district}>
             <select {...register("district", { required: "জেলা বেছে নিন" })} className={selectClass}>
-              <option value="">বেছে নিন</option>
+              <option value="">{t("auth.selectOption")}</option>
               {districts.map((d) => (
                 <option key={d} value={d}>{d}</option>
               ))}
@@ -95,22 +94,22 @@ export default function CompleteProfilePage() {
           </FormInput>
 
           <FormInput
-            label="Upazila"
+            label={t("auth.upazila")}
             error={errors.upazila}
             registration={register("upazila", { required: "উপজেলা দিন" })}
-            placeholder="আপনার উপজেলা"
+            placeholder={t("auth.upazilaPlaceholder")}
           />
         </div>
 
         <FormInput
-          label="Present Address"
+          label={t("auth.presentAddress")}
           error={errors.address}
           registration={register("address", { required: "বর্তমান ঠিকানা দিন" })}
-          placeholder="বিস্তারিত ঠিকানা — এটি দিয়ে নিকটতম ডোনার/সিকার নির্ধারণ করা হবে"
+          placeholder={t("auth.addressPlaceholder")}
         />
 
         <button type="submit" disabled={submitting} className="btn-primary mt-2 w-full justify-center">
-          {submitting ? <FiLoader className="animate-spin" /> : "Save & Continue"}
+          {submitting ? <FiLoader className="animate-spin" /> : t("auth.continueToDashboard")}
         </button>
       </form>
     </AuthLayout>

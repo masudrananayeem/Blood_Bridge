@@ -19,6 +19,8 @@ const LoginPage = lazy(() => import("./pages/auth/LoginPage.jsx"));
 const RegisterPage = lazy(() => import("./pages/auth/RegisterPage.jsx"));
 const ForgotPasswordPage = lazy(() => import("./pages/auth/ForgotPasswordPage.jsx"));
 const CompleteProfilePage = lazy(() => import("./pages/auth/CompleteProfilePage.jsx"));
+const PrivacyPolicyPage = lazy(() => import("./pages/PrivacyPolicyPage.jsx"));
+const TermsOfServicePage = lazy(() => import("./pages/TermsOfServicePage.jsx"));
 
 // Dashboard (role-switchable, protected)
 const DashboardLayout = lazy(() => import("./layouts/DashboardLayout.jsx"));
@@ -34,6 +36,7 @@ const AdminRequests = lazy(() => import("./pages/admin/AdminRequests.jsx"));
 const AdminAnalytics = lazy(() => import("./pages/admin/AdminAnalytics.jsx"));
 const AdminSettings = lazy(() => import("./pages/admin/AdminSettings.jsx"));
 const AdminOrganizations = lazy(() => import("./pages/admin/AdminOrganizations.jsx"));
+const AdminFeedback = lazy(() => import("./pages/admin/AdminFeedback.jsx"));
 
 // 404
 const NotFound = lazy(() => import("./pages/NotFound.jsx"));
@@ -47,6 +50,8 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+        <Route path="/terms" element={<TermsOfServicePage />} />
         <Route
           path="/complete-profile"
           element={
@@ -85,6 +90,7 @@ function App() {
           <Route path="analytics" element={<AdminAnalytics />} />
           <Route path="settings" element={<AdminSettings />} />
           <Route path="organizations" element={<AdminOrganizations />} />
+          <Route path="feedback" element={<AdminFeedback />} />
         </Route>
 
         <Route path="*" element={<NotFound />} />

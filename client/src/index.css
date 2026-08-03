@@ -2,6 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ডার্ক মোডে ড্রপডাউন অপশনের কালার ঠিক করতে */
+.dark select {
+  color-scheme: dark;
+}
+
+.dark select option {
+  background-color: #1f2937 !important;
+  color: #ffffff !important;
+}
+
+/* লাইট মোডে ড্রপডাউন অপশন */
+select option {
+  background-color: #ffffff !important;
+  color: #111827 !important;
+}
+
 @layer base {
   html {
     scroll-behavior: smooth;

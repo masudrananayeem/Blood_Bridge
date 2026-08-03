@@ -6,9 +6,11 @@ import { FiLoader, FiCheckCircle } from "react-icons/fi";
 import AuthLayout from "../../components/auth/AuthLayout.jsx";
 import FormInput from "../../components/auth/FormInput.jsx";
 import { useAuth } from "../../context/AuthContext.jsx";
+import { useLanguage } from "../../context/LanguageContext.jsx";
 
 export default function ForgotPasswordPage() {
   const { resetPassword } = useAuth();
+  const { t } = useLanguage();
   const [submitting, setSubmitting] = useState(false);
   const [sent, setSent] = useState(false);
 
@@ -35,18 +37,18 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <AuthLayout title="পাসওয়ার্ড রিসেট করুন" subtitle="আপনার ইমেইলে একটি রিসেট লিংক পাঠানো হবে">
+    <AuthLayout title={t("auth.resetPasswordTitle")} subtitle={t("auth.resetPasswordSubtitle")}>
       {sent ? (
         <div className="glass-card flex flex-col items-center gap-3 p-8 text-center">
           <FiCheckCircle className="text-brand-600" size={40} />
           <p className="text-sm text-gray-600 dark:text-gray-300">
-            রিসেট লিংক পাঠানো হয়েছে। আপনার ইমেইল ইনবক্স (এবং স্প্যাম ফোল্ডার) চেক করুন।
+            {t("auth.resetLinkSentDesc")}
           </p>
         </div>
       ) : (
         <form onSubmit={handleSubmit(onSubmit)} noValidate>
           <FormInput
-            label="Email"
+            label={t("auth.email")}
             type="email"
             error={errors.email}
             registration={register("email", {
@@ -56,14 +58,14 @@ export default function ForgotPasswordPage() {
             placeholder="you@example.com"
           />
           <button type="submit" disabled={submitting} className="btn-primary w-full justify-center">
-            {submitting ? <FiLoader className="animate-spin" /> : "রিসেট লিংক পাঠান"}
+            {submitting ? <FiLoader className="animate-spin" /> : t("auth.sendResetLink")}
           </button>
         </form>
       )}
 
       <p className="mt-8 text-center text-sm text-gray-500 dark:text-gray-400">
         <Link to="/login" className="font-semibold text-brand-600 hover:underline">
-          ← লগইনে ফিরে যান
+          ← {t("auth.backToLogin")}
         </Link>
       </p>
     </AuthLayout>

@@ -4,8 +4,10 @@ import toast from "react-hot-toast";
 import { FiShield, FiTrash2, FiSearch } from "react-icons/fi";
 import { getAllUsers, toggleVerifyUser, deleteUser } from "../../services/adminService.js";
 import Loader from "../../components/common/Loader.jsx";
+import { useLanguage } from "../../context/LanguageContext.jsx";
 
 export default function AdminUsers() {
+  const { t } = useLanguage();
   const [searchParams, setSearchParams] = useSearchParams();
   const mode = searchParams.get("mode") || "";
 
@@ -32,20 +34,20 @@ export default function AdminUsers() {
     try {
       const { isVerified } = await toggleVerifyUser(id);
       setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, isVerified } : u)));
-      toast.success(isVerified ? "ইউজার ভেরিফাই করা হয়েছে" : "ভেরিফিকেশন সরানো হয়েছে");
+      toast.success(isVerified ? t("adminUsers.verified") : t("adminUsers.unverified"));
     } catch {
-      toast.error("করা যায়নি");
+      toast.error(t("adminOrg.actionFailed"));
     }
   };
 
   const handleDelete = async (id) => {
-    if (!confirm("এই ইউজারকে স্থায়ীভাবে ডিলিট করবেন?")) return;
+    if (!confirm(t("adminUsers.confirmDelete"))) return;
     try {
       await deleteUser(id);
       setUsers((prev) => prev.filter((u) => u.id !== id));
-      toast.success("ইউজার ডিলিট করা হয়েছে");
+      toast.success(t("adminUsers.deleted"));
     } catch {
-      toast.error("ডিলিট করা যায়নি");
+      toast.error(t("adminOrg.deleteFailed"));
     }
   };
 
@@ -77,7 +79,7 @@ export default function AdminUsers() {
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="নাম, ইমেইল বা ফোন দিয়ে খুঁজুন"
+          placeholder={t("adminUsers.searchPlaceholder")}
           className="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:border-white/10 dark:bg-white/5 dark:text-white"
         />
         <button type="submit" className="btn-primary !px-4">
@@ -108,12 +110,18 @@ export default function AdminUsers() {
                     <p className="text-xs text-gray-400">{u.email}</p>
                   </td>
                   <td className="px-4 py-3">
-                    <span className="rounded-full bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-700 dark:bg-brand-950/50 dark:text-brand-300">
-                      {u.bloodGroup}
-                    </span>
+                    {u.profileComplete === false ? (
+                      <span className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-600 dark:bg-amber-950/40">
+                        Incomplete Profile
+                      </span>
+                    ) : (
+                      <span className="rounded-full bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-700 dark:bg-brand-950/50 dark:text-brand-300">
+                        {u.bloodGroup}
+                      </span>
+                    )}
                   </td>
                   <td className="px-4 py-3 text-gray-500 dark:text-gray-400">
-                    {u.upazila}, {u.district}
+                    {u.profileComplete === false ? "—" : `${u.upazila}, ${u.district}`}
                   </td>
                   <td className="px-4 py-3 capitalize text-gray-500 dark:text-gray-400">{u.activeMode}</td>
                   <td className="px-4 py-3">
@@ -129,7 +137,9 @@ export default function AdminUsers() {
                     <div className="flex justify-end gap-2">
                       <button
                         onClick={() => handleVerify(u.id)}
-                        className="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-600 hover:bg-gray-50 dark:border-white/10 dark:text-gray-300 dark:hover:bg-white/5"
+                        disabled={u.profileComplete === false}
+                        title={u.profileComplete === false ? "Profile isn't complete yet" : ""}
+                        className="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-white/10 dark:text-gray-300 dark:hover:bg-white/5"
                       >
                         {u.isVerified ? "Unverify" : "Verify"}
                       </button>
@@ -147,7 +157,7 @@ export default function AdminUsers() {
           </table>
 
           {users.length === 0 && (
-            <p className="p-8 text-center text-gray-400">কোনো ইউজার পাওয়া যায়নি।</p>
+            <p className="p-8 text-center text-gray-400">{t("adminUsers.noneFound")}</p>
           )}
         </div>
       )}

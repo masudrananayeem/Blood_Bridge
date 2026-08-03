@@ -44,7 +44,7 @@ export default function EmergencyRequestForm() {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="glass-card max-w-2xl space-y-4 p-6">
       <div className="mb-2 flex items-center gap-2 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600 dark:bg-red-950/30">
-        <FiAlertTriangle /> সঠিক তথ্য দিন। <b>High</b> Urgency বেছে নিলে শুধু আপনার সবচেয়ে কাছের ৫ জন ডোনারকে সাথে সাথে নোটিফাই করা হবে; Medium/Low হলে একই ব্লাড গ্রুপ ও জেলার সব Active ডোনারকে জানানো হবে।
+        <FiAlertTriangle /> {t("emergency.urgencyNotice")}
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

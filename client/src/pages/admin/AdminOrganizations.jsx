@@ -11,6 +11,8 @@ import {
 import { uploadProfileImage } from "../../services/uploadImage.js";
 import districts from "../../utils/districts.js";
 import Loader from "../../components/common/Loader.jsx";
+import Modal from "../../components/common/Modal.jsx";
+import { useLanguage } from "../../context/LanguageContext.jsx";
 
 const TYPES = ["Voluntary Group", "NGO", "Blood Bank", "Hospital"];
 
@@ -28,6 +30,7 @@ const emptyForm = {
 };
 
 export default function AdminOrganizations() {
+  const { t } = useLanguage();
   const [organizations, setOrganizations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
@@ -73,15 +76,15 @@ export default function AdminOrganizations() {
       if (editingId) {
         const { organization } = await updateOrganization(editingId, payload);
         setOrganizations((prev) => prev.map((o) => (o.id === editingId ? organization : o)));
-        toast.success("তথ্য আপডেট হয়েছে");
+        toast.success(t("adminOrg.updated"));
       } else {
         const { organization } = await createOrganization(payload);
         setOrganizations((prev) => [organization, ...prev]);
-        toast.success("সংগঠন যোগ করা হয়েছে");
+        toast.success(t("adminOrg.added"));
       }
       setFormOpen(false);
     } catch (err) {
-      toast.error(err?.response?.data?.message || "সেভ করা যায়নি");
+      toast.error(err?.response?.data?.message || t("adminOrg.saveFailed"));
     } finally {
       setSaving(false);
     }
@@ -91,20 +94,20 @@ export default function AdminOrganizations() {
     try {
       const { organization } = await toggleVerifyOrganization(id);
       setOrganizations((prev) => prev.map((o) => (o.id === id ? organization : o)));
-      toast.success(organization.isVerified ? "ভেরিফাই করা হয়েছে" : "ভেরিফিকেশন সরানো হয়েছে");
+      toast.success(organization.isVerified ? t("adminOrg.verified") : t("adminOrg.unverified"));
     } catch {
-      toast.error("করা যায়নি");
+      toast.error(t("adminOrg.actionFailed"));
     }
   };
 
   const handleDelete = async (id) => {
-    if (!confirm("এই সংগঠনটি স্থায়ীভাবে ডিলিট করবেন?")) return;
+    if (!confirm(t("adminOrg.confirmDelete"))) return;
     try {
       await deleteOrganization(id);
       setOrganizations((prev) => prev.filter((o) => o.id !== id));
-      toast.success("ডিলিট করা হয়েছে");
+      toast.success(t("adminOrg.deleted"));
     } catch {
-      toast.error("ডিলিট করা যায়নি");
+      toast.error(t("adminOrg.deleteFailed"));
     }
   };
 
@@ -175,7 +178,7 @@ export default function AdminOrganizations() {
               {organizations.length === 0 && (
                 <tr>
                   <td colSpan={6} className="px-5 py-8 text-center text-gray-400">
-                    কোনো সংগঠন যোগ করা হয়নি।
+                    {t("adminOrg.noneYet")}
                   </td>
                 </tr>
               )}
@@ -185,7 +188,7 @@ export default function AdminOrganizations() {
       )}
 
       {formOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setFormOpen(false)}>
+        <Modal onClose={() => setFormOpen(false)}>
           <div
             onClick={(e) => e.stopPropagation()}
             className="glass-card max-h-[90vh] w-full max-w-lg space-y-4 overflow-y-auto p-6"
@@ -204,8 +207,8 @@ export default function AdminOrganizations() {
 
               <div className="grid grid-cols-2 gap-3">
                 <select name="type" value={form.type} onChange={handleChange} className={inputClass}>
-                  {TYPES.map((t) => (
-                    <option key={t} value={t}>{t}</option>
+                  {TYPES.map((typeOption) => (
+                    <option key={typeOption} value={typeOption}>{typeOption}</option>
                   ))}
                 </select>
                 <select name="district" value={form.district} onChange={handleChange} required className={inputClass}>
@@ -230,7 +233,7 @@ export default function AdminOrganizations() {
                 value={form.description}
                 onChange={handleChange}
                 rows={3}
-                placeholder="সংক্ষিপ্ত বিবরণ"
+                placeholder={t("adminOrg.descriptionPlaceholder")}
                 className={inputClass}
               />
 
@@ -249,7 +252,7 @@ export default function AdminOrganizations() {
               </button>
             </form>
           </div>
-        </div>
+        </Modal>
       )}
     </div>
   );

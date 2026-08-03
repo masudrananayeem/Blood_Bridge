@@ -7,9 +7,11 @@ import { FiLoader } from "react-icons/fi";
 import AuthLayout from "../../components/auth/AuthLayout.jsx";
 import FormInput from "../../components/auth/FormInput.jsx";
 import { useAuth } from "../../context/AuthContext.jsx";
+import { useLanguage } from "../../context/LanguageContext.jsx";
 
 export default function LoginPage() {
   const { loginWithEmail, loginWithGoogle } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
   const [submitting, setSubmitting] = useState(false);
@@ -57,10 +59,10 @@ export default function LoginPage() {
   };
 
   return (
-    <AuthLayout title="আবার স্বাগতম" subtitle="আপনার অ্যাকাউন্টে লগইন করুন">
+    <AuthLayout title={t("auth.welcomeBack")} subtitle={t("auth.welcomeBackSubtitle")}>
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <FormInput
-          label="Email"
+          label={t("auth.email")}
           type="email"
           error={errors.email}
           registration={register("email", {
@@ -70,7 +72,7 @@ export default function LoginPage() {
           placeholder="you@example.com"
         />
         <FormInput
-          label="Password"
+          label={t("auth.password")}
           type="password"
           error={errors.password}
           registration={register("password", { required: "Password দিন" })}
@@ -79,18 +81,18 @@ export default function LoginPage() {
 
         <div className="mb-6 flex justify-end">
           <Link to="/forgot-password" className="text-sm font-medium text-brand-600 hover:underline">
-            পাসওয়ার্ড ভুলে গেছেন?
+            {t("auth.forgotPassword")}
           </Link>
         </div>
 
         <button type="submit" disabled={submitting} className="btn-primary w-full justify-center">
-          {submitting ? <FiLoader className="animate-spin" /> : "Login"}
+          {submitting ? <FiLoader className="animate-spin" /> : t("auth.login")}
         </button>
       </form>
 
       <div className="my-6 flex items-center gap-3 text-xs text-gray-400">
         <div className="h-px flex-1 bg-gray-200 dark:bg-white/10" />
-        অথবা
+        {t("auth.or")}
         <div className="h-px flex-1 bg-gray-200 dark:bg-white/10" />
       </div>
 
@@ -100,13 +102,13 @@ export default function LoginPage() {
         className="flex w-full items-center justify-center gap-3 rounded-full border border-gray-200 bg-white py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition-colors hover:bg-gray-50 dark:border-white/10 dark:bg-white/5 dark:text-gray-200"
       >
         {googleLoading ? <FiLoader className="animate-spin" /> : <FcGoogle size={20} />}
-        Google দিয়ে লগইন করুন
+        {t("auth.loginWithGoogle")}
       </button>
 
       <p className="mt-8 text-center text-sm text-gray-500 dark:text-gray-400">
-        অ্যাকাউন্ট নেই?{" "}
+        {t("auth.dontHaveAccount")}{" "}
         <Link to="/register" className="font-semibold text-brand-600 hover:underline">
-          রেজিস্টার করুন
+          {t("auth.register")}
         </Link>
       </p>
     </AuthLayout>

@@ -94,15 +94,15 @@ export default function Hero() {
             className="mt-10 grid max-w-md grid-cols-3 gap-4 border-t border-gray-200 pt-6 dark:border-white/10"
           >
             <div>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">৫০০+</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{t("hero.statDonorsValue")}</p>
               <p className="text-xs text-gray-500 dark:text-gray-400">{t("hero.statDonors")}</p>
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">২০০+</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{t("hero.statLivesValue")}</p>
               <p className="text-xs text-gray-500 dark:text-gray-400">{t("hero.statLives")}</p>
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">৬৪</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{t("hero.statDistrictsValue")}</p>
               <p className="text-xs text-gray-500 dark:text-gray-400">{t("hero.statDistricts")}</p>
             </div>
           </motion.div>

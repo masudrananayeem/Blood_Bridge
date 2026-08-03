@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { getAnalytics } from "../../services/adminService.js";
 import Loader from "../../components/common/Loader.jsx";
+import { useLanguage } from "../../context/LanguageContext.jsx";
 
 const statusColors = {
   pending: "#f59e0b",
@@ -11,6 +12,7 @@ const statusColors = {
 };
 
 export default function AdminAnalytics() {
+  const { t } = useLanguage();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -69,7 +71,7 @@ export default function AdminAnalytics() {
             </div>
           ))}
           {statusData.length === 0 && (
-            <p className="text-sm text-gray-400">এখনো কোনো রিকোয়েস্ট ডেটা নেই।</p>
+            <p className="text-sm text-gray-400">{t("adminAnalytics.noData")}</p>
           )}
         </div>
       </div>
