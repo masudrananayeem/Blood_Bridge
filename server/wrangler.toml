@@ -1,7 +1,16 @@
 ## Minimal Cloudflare Workers config for the BloodBridge backend.
-name = "bloodbridge-backend"
+name = "blood-bridge-server"
 main = "worker.js"
 compatibility_date = "2025-01-01"
+preview_urls = false
+
+# Workers Observability: enables Live Logs + metrics for this Worker in the
+# Cloudflare dashboard (Workers > blood-bridge-server > Logs / Metrics).
+# `head_sampling_rate` is the fraction of requests sampled for traces/logs
+# (1.0 = every request; lower it if ingestion volume/cost is a concern).
+[observability]
+enabled = true
+head_sampling_rate = 1
 
 [vars]
 # Public, non-secret values. Put secrets (below) via `wrangler secret put`.

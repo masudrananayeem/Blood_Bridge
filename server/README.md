@@ -1,6 +1,6 @@
 # 🩸 BloodBridge — Backend API
 
-Ruby Hono (Web-standard) backend for the BloodBridge blood-donation platform. The **exact same code** runs on **Node.js** (Render/local) and **Cloudflare Workers** — no fork, no rewrite. It uses a wrapped Firestore REST client + Firebase Auth REST, so it needs **no firebase-admin SDK** and no Cloudflare bindings beyond plain secrets.
+Hono (Web-standard) backend for the BloodBridge blood-donation platform. The **exact same code** runs on **Node.js** (Render/local) and **Cloudflare Workers** — no fork, no rewrite. It uses a wrapped Firestore REST client + Firebase Auth REST, so it needs **no firebase-admin SDK** and no Cloudflare bindings beyond plain secrets.
 
 ---
 
@@ -35,7 +35,7 @@ server/
 ├── middlewares/         # auth, validators, ratelimit, security headers, error handler
 ├── config/              # env.js (runtime-agnostic env access) + serviceAccount.js
 ├── utils/               # firestoreClient, auth, jwt, notify, cloudinary, districtCoords
-└── scripts/             # make-expanded CLI helpers (Node only)
+└── scripts/             # admin CLI helpers (makeAdmin, listAdmins, cleanup — Node only)
 ```
 
 `config/env.js` unifies env access for **both** runtimes:
@@ -95,6 +95,12 @@ npx wrangler secret put CLOUDINARY_API_SECRET
 Set the non-secret var in `wrangler.toml`:
 
 ```toml
+name = "blood-bridge-server"      # deploy name → https://blood-bridge-server.<account>.workers.dev
+
+[observability]                   # Live Logs + metrics in the dashboard
+enabled = true
+head_sampling_rate = 1
+
 [vars]
 CLIENT_URL = "https://your-frontend.example"   # must match your frontend origin
 ```
@@ -113,6 +119,7 @@ npx wrangler deploy        # or: npm run worker:deploy
   ```
 - Auth endpoints are capped at **1000 requests / 15 min / IP**; the global API limiter cap is set in `app.js`.
 - `compatibility_date` and entry point (`main = "worker.js"`) are preconfigured in `wrangler.toml`.
+- **Observability** is enabled (`[observability] enabled = true, head_sampling_rate = 1`) — after deploying, view request logs, metrics, and traces under **Workers → `blood-bridge-server` → Logs/Metrics** in the Cloudflare dashboard.
 - Dashboard-set secrets/vars **override** `wrangler.toml` values on deploy; secrets live only in the dashboard.
 
 ---
