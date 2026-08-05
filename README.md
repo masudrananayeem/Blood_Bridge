@@ -23,7 +23,7 @@ A full-stack blood donation management platform that connects blood donors with 
 
 **Backend:** Hono (Web-standard HTTP, runs on Node **and** Cloudflare Workers), @hono/node-server (Node host), jose + WebCrypto (JWT), Firestore REST + Firebase Auth REST (no firebase-admin SDK needed), Cloudinary REST
 
-**Hosting:** Frontend → Vercel · Backend → Render (Node) **or** Cloudflare Workers (same code) · Database → Firebase Firestore · Images → Cloudinary
+**Hosting:** Frontend → Cloudflare Pages · Backend → Cloudflare Workers (same code, also runs on Node) · Database → Firebase Firestore · Images → Cloudinary
 
 > The backend is a single Hono app with two thin entry points — `server.js`
 > (`@hono/node-server` for Node/Render) and `worker.js` (Cloudflare Workers).
@@ -162,24 +162,11 @@ All routes except `/auth/register` and `/auth/login` require `Authorization: Bea
 
 ## ☁️ Deployment
 
-**Frontend (Vercel):**
-1. Push the `client/` folder to a GitHub repo
-2. Import it in Vercel → set root directory to `client`
-3. Add the same variables from `client/.env` as Vercel environment variables
-4. Deploy — Vercel auto-detects Vite
+Everything runs on Cloudflare: **frontend on Cloudflare Pages**, **backend on Cloudflare Workers**. The frontend calls the same-origin `/api/*`, which a Pages Function proxies to the Worker — so the backend URL is **never exposed to the browser**.
 
-**Backend (Render):**
-1. Push the `server/` folder to a GitHub repo (or the same repo, different root)
-2. Create a new Web Service on Render → root directory `server`
-3. Build command: `npm install` · Start command: `npm start`
-4. Add all `server/.env` variables in Render's Environment tab
-5. Update `CLIENT_URL` to your deployed Vercel URL, and update the frontend's `VITE_API_URL` to your Render URL
+### Backend → Cloudflare Workers
 
-**Database:** Firebase Firestore — create the required collections in your Firebase project.
-
-### ☁️ Cloudflare Workers (alternative backend host)
-
-The **exact same code** runs on Cloudflare Workers — no fork, no rewrite. From `server/`:
+The `server/` folder is a single Hono app with two entry points (`server.js` for Node, `worker.js` for Workers). From `server/`:
 
 ```bash
 cd server
@@ -197,24 +184,56 @@ npx wrangler secret put CLOUDINARY_API_KEY
 npx wrangler secret put CLOUDINARY_API_SECRET
 ```
 
-Then deploy:
+`wrangler.toml` is preconfigured: worker `blood-bridge-server`, `main = "worker.js"`,
+`[vars] CLIENT_URL`, `[observability] enabled`, and `preview_urls = false`.
+Set `CLIENT_URL` to your frontend origin, then deploy:
 
 ```bash
 npx wrangler deploy
 ```
 
+Deployed URL: `https://blood-bridge-server.<your-account-subdomain>.workers.dev`.
+
 Notes:
-- Edit `server/wrangler.toml` → `[vars]` → set `CLIENT_URL` to your frontend and a
-  `compatibility_date`. Entry is `worker.js` (already set).
-- To get durable, cross-edge rate limiting, create a KV namespace
-  (`npx wrangler kv namespace create RATE_LIMITER`) and uncomment the
-  `[[kv_namespaces]]` block in `wrangler.toml`. Without KV, the limiter uses an
-  in-process counter (fine for Node and small-scale Workers).
-- The Firestore/Auth client talks to Google over HTTPS REST (OAuth2 service-account
-  tokens), so it needs no extra bindings — just the service-account secret above.
-- Local `npm run dev` / `npm start` behaviour is unchanged (same routes, same port).
+- Firestore/Auth use Google REST (OAuth2 service-account tokens) — no extra bindings needed.
+- For durable, cross-edge rate limiting, `npx wrangler kv namespace create RATE_LIMITER`
+  and uncomment `[[kv_namespaces]]` in `wrangler.toml`. Without KV, the limiter is in-process.
+- Local `npm run dev` / `npm start` behave the same (same routes, port `5000`).
+
+### Frontend → Cloudflare Pages
+
+1. Push the `client/` folder to a GitHub repo (e.g. `Blood_Bridge-Client`).
+2. In Cloudflare Pages: **Create project → connect the repo**.
+3. Build settings: build command `npm run build`, output directory `dist`.
+4. Add environment variables (Production):
+
+   ```
+   VITE_API_URL=/api                          # same-origin base — never a full URL
+   API_ORIGIN=https://blood-bridge-server.<account>.workers.dev   # server-side proxy target
+   VITE_FIREBASE_API_KEY=...                  # Firebase web config
+   VITE_FIREBASE_AUTH_DOMAIN=...
+   VITE_FIREBASE_PROJECT_ID=...
+   VITE_FIREBASE_STORAGE_BUCKET=...
+   VITE_FIREBASE_MESSAGING_SENDER_ID=...
+   VITE_FIREBASE_APP_ID=...
+   VITE_CLOUDINARY_CLOUD_NAME=...
+   VITE_CLOUDINARY_UPLOAD_PRESET=...
+   ```
+
+5. Deploy.
+
+How the proxy works:
+- `client/functions/api/[[path]].js` forwards any `/api/*` request to `API_ORIGIN` (a server-side Pages variable, never shipped to the browser).
+- `client/public/_redirects` (`/* /index.html 200`) enables SPA deep links.
+- In local dev, `client/vite.config.js` proxies `/api` to `API_PROXY_ORIGIN` (set in `client/.env.local`), so the backend URL stays hidden in dev too.
+
+### Database
+
+Firebase Firestore — enable Authentication (Email/Password + Google) and create the required collections in your Firebase project. The service-account secret above must belong to the same project as the frontend's Firebase config.
 
 ---
+
+
 
 ## 📸 Screenshots
 
