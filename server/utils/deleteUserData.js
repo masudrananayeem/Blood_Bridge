@@ -1,10 +1,11 @@
 import { collections, serializeDocs } from "./firestore.js";
+import { deleteUser } from "./auth.js";
 
 // Deletes a user's Firestore profile plus every request, donation-history
 // entry, and notification tied to them, then removes the Firebase Auth
 // account. Shared by the admin "delete user" action and the user's own
 // "Delete Account" (Account Settings) action.
-export const deleteUserCascade = async (admin, user) => {
+export const deleteUserCascade = async (user) => {
   const [requests, donationHistory, notifications, feedback] = await Promise.all([
     serializeDocs(await collections.requests.get()),
     serializeDocs(await collections.donationHistory.get()),
@@ -42,13 +43,12 @@ export const deleteUserCascade = async (admin, user) => {
 
   await Promise.all(deletions);
   await collections.users.doc(user.id).delete();
+  // Firebase Auth account may already be gone (removed directly from the
+  // console) — that's exactly the "ghost profile" case being cleaned up.
   try {
-    await admin.auth().deleteUser(user.firebaseUid);
+    await deleteUser(user.firebaseUid);
   } catch (err) {
-    // Already gone from Firebase Auth (e.g. removed directly via the
-    // Firebase console) — that's exactly the "ghost profile" case this
-    // cascade is meant to clean up, so it's fine to keep going.
-    if (err?.code !== "auth/user-not-found") throw err;
+    if (!/not found|not_found|no user/i.test(err?.message || "")) throw err;
   }
 };
 

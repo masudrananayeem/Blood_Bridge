@@ -1,4 +1,4 @@
-import express from "express";
+import { Hono } from "hono";
 import { protect } from "../middlewares/authMiddleware.js";
 import {
   updateProfile,
@@ -12,7 +12,7 @@ import {
   deleteMyAccount,
 } from "../controllers/userController.js";
 
-const router = express.Router();
+const router = new Hono();
 
 router.use(protect); // every route below requires a logged-in user
 

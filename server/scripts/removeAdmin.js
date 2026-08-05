@@ -12,7 +12,8 @@
  * Requires the same .env as the server (FIREBASE_SERVICE_ACCOUNT_BASE64).
  */
 import "dotenv/config";
-import admin, { db } from "../config/firebaseAdmin.js";
+import { db, FieldValue } from "../utils/firestore.js";
+import { getServiceAccount } from "../config/serviceAccount.js";
 
 const email = process.argv[2];
 
@@ -21,8 +22,8 @@ if (!email) {
   process.exit(1);
 }
 
-if (!db) {
-  console.error("Firebase Admin isn't initialized — check FIREBASE_SERVICE_ACCOUNT_BASE64 in server/.env");
+if (!getServiceAccount()) {
+  console.error("Firebase isn't configured — check FIREBASE_SERVICE_ACCOUNT_BASE64 in server/.env");
   process.exit(1);
 }
 
@@ -53,7 +54,7 @@ const run = async () => {
     process.exit(1);
   }
 
-  await userDoc.ref.update({ role: "donor", updatedAt: admin.firestore.FieldValue.serverTimestamp() });
+  await db.collection("users").doc(userDoc.id).update({ role: "donor", updatedAt: FieldValue.serverTimestamp() });
 
   console.log(`✅ ${email} is no longer an admin — back to a normal donor account.`);
   process.exit(0);

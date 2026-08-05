@@ -7,10 +7,11 @@
  * Requires the same .env as the server (FIREBASE_SERVICE_ACCOUNT_BASE64).
  */
 import "dotenv/config";
-import { db } from "../config/firebaseAdmin.js";
+import { db } from "../utils/firestore.js";
+import { getServiceAccount } from "../config/serviceAccount.js";
 
-if (!db) {
-  console.error("Firebase Admin isn't initialized — check FIREBASE_SERVICE_ACCOUNT_BASE64 in server/.env");
+if (!getServiceAccount()) {
+  console.error("Firebase isn't configured — check FIREBASE_SERVICE_ACCOUNT_BASE64 in server/.env");
   process.exit(1);
 }
 

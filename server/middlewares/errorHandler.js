@@ -1,17 +1,44 @@
-// Handles requests to routes that don't exist
-export const notFound = (req, res, next) => {
-  const error = new Error(`Not Found - ${req.originalUrl}`);
-  res.status(404);
-  next(error);
+// Centralized error handling for the Hono app. Controllers throw HttpError to
+// carry an HTTP status; `onError` shapes the JSON response (same envelope the
+// app returned before). Mirrors the previous errorHandler behaviour.
+import { getEnv } from "../config/env.js";
+
+export class HttpError extends Error {
+  constructor(status, message) {
+    super(message);
+    this.status = status;
+  }
+}
+
+export const onError = (err, c) => {
+  if (err instanceof HttpError) {
+    return c.json(
+      {
+        success: false,
+        message: err.message,
+        stack: getEnv("NODE_ENV") === "production" ? undefined : err.stack,
+      },
+      err.status
+    );
+  }
+
+  const status =
+    Number.isInteger(err?.status)
+      ? err.status
+      : Number.isInteger(err?.statusCode)
+      ? err.statusCode
+      : 500;
+  return c.json(
+    {
+      success: false,
+      message: err?.message || "Server Error",
+      stack: getEnv("NODE_ENV") === "production" ? undefined : err?.stack,
+    },
+    status
+  );
 };
 
-// Centralized error formatter — every controller can just `next(err)`
-export const errorHandler = (err, req, res, next) => {
-  const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
+export const notFound = (c) =>
+  c.json({ success: false, message: `Not Found - ${c.req.path}` }, 404);
 
-  res.status(statusCode).json({
-    success: false,
-    message: err.message || "Server Error",
-    stack: process.env.NODE_ENV === "production" ? undefined : err.stack,
-  });
-};
+export default { HttpError, onError, notFound };

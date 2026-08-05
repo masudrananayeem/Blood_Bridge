@@ -105,7 +105,8 @@ export default function RegisterPage() {
       toast.success("অ্যাকাউন্ট তৈরি হয়েছে!");
       setRegisteredEmail(formData.email);
     } catch (err) {
-      toast.error(mapFirebaseError(err.code) || "রেজিস্ট্রেশন ব্যর্থ হয়েছে, আবার চেষ্টা করুন।");
+      const serverMsg = err.response?.data?.errors?.[0]?.msg;
+      toast.error(serverMsg || mapFirebaseError(err.code) || "রেজিস্ট্রেশন ব্যর্থ হয়েছে, আবার চেষ্টা করুন।");
     } finally {
       setSubmitting(false);
     }

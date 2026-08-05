@@ -1,7 +1,6 @@
-import express from "express";
+import { Hono } from "hono";
 import { protect } from "../middlewares/authMiddleware.js";
-import { validateRequest } from "../middlewares/requestValidators.js";
-import { handleValidation } from "../middlewares/validators.js";
+import { validateRequest } from "../middlewares/validators.js";
 import {
   createRequest,
   getMyRequests,
@@ -11,11 +10,11 @@ import {
   respondToRequest,
 } from "../controllers/requestController.js";
 
-const router = express.Router();
+const router = new Hono();
 
 router.use(protect);
 
-router.post("/", validateRequest, handleValidation, createRequest);
+router.post("/", validateRequest, createRequest);
 router.get("/my-requests", getMyRequests);
 router.get("/incoming", getIncomingRequests);
 router.get("/nearby", getNearbyRequests);

@@ -1,5 +1,41 @@
 # BloodBridge — Changes in this update
 
+## Backend: now runs on Cloudflare Workers (and Node) — single codebase
+
+The Express + `firebase-admin` backend was replaced with a **single Hono app**
+that runs identically on **Node/Render** (`server.js`, same routes/port/JSON)
+and **Cloudflare Workers** (`worker.js`, `npx wrangler deploy`). No behavior
+changes to any API response.
+
+Why: the official `firebase-admin` SDK depends on gRPC + Node crypto and cannot
+run on Cloudflare Workers, so the data/auth layer was moved to Web-standard
+`fetch` + `crypto.subtle` bridge `jose`.
+
+Changed:
+- **Framework**: Express → Hono (`@hono/node-server` for the Node entry).
+- **Firestore**: `firebase-admin` → a thin runtime-agnostic **Firestore REST
+  client** (`utils/firestoreClient.js`) mirroring the exact API surface used
+  (`collection/doc/add/get/set/update/delete`, `where/limit`, `batch`,
+  `FieldValue.serverTimestamp`). Custom encoder/decoder, OAuth2 service-account
+  token minting via WebCrypto.
+- **Auth**: Firebase `verifyIdToken`/`deleteUser` over REST + Google JWKS
+  (`utils/auth.js`). ID-token verification checks `iss`/`aud`/`exp` like the
+  Admin SDK.
+- **JWT**: `jsonwebtoken` → `jose` (HS256), identical tokens.
+- **Rate limiting**: `express-rate-limit` → cross-runtime limiter
+  (`utils`/`middlewares/ratelimit.js`) — in-process on Node, Cloudflare **KV**
+  backed when a `RATE_LIMITER` namespace is bound.
+- **Security headers**: `helmet` → tiny `middlewares/security.js`; `cors`,
+  `express-validator`, `morgan` dropped (manual validators, no-op logging).
+- **Cloudinary**: SDK → REST delete helper (`utils/cloudinary.js`, SHA1-signed).
+- Removed unused deps (`multer`, `bcryptjs`), cut the worker bundle to ~45 KB
+  gzipped.
+- CLI scripts (make/remove/list-admin, cleanup-orphans) rewritten on the same
+  runtime-agnostic modules; `dotenv` kept only for Node/script env loading.
+
+Env: `server/.env.example` now supports either the legacy base64 service-account
+or a raw JSON string; on Workers secrets go through `wrangler secret put`.
+
 ## Bug fix (affected almost every screen)
 The frontend everywhere read `record._id`, but the backend (Firestore) actually
 returns `record.id`. This silently broke: donor search cards, saved donors,

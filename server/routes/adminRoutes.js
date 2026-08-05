@@ -1,4 +1,4 @@
-import express from "express";
+import { Hono } from "hono";
 import { protect, authorize } from "../middlewares/authMiddleware.js";
 import {
   getDashboardStats,
@@ -10,7 +10,7 @@ import {
   updateRequestStatus,
 } from "../controllers/adminController.js";
 
-const router = express.Router();
+const router = new Hono();
 
 router.use(protect, authorize("admin"));
 

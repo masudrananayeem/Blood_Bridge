@@ -1,8 +1,8 @@
-import express from "express";
+import { Hono } from "hono";
 import { protect } from "../middlewares/authMiddleware.js";
 import { getMyNotifications, markAsRead, markAllAsRead } from "../controllers/notificationController.js";
 
-const router = express.Router();
+const router = new Hono();
 
 router.use(protect);
 

@@ -8,6 +8,9 @@ build/
 .vite/
 *.tsbuildinfo
 
+# Cloudflare Workers
+.wrangler/
+
 # Env
 .env
 .env.local

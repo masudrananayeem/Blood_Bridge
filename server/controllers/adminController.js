@@ -1,7 +1,8 @@
-import admin from "../config/firebaseAdmin.js";
 import { collections, serializeDoc, serializeDocs, FieldValue } from "../utils/firestore.js";
 import notify from "../utils/notify.js";
 import { deleteUserCascade } from "../utils/deleteUserData.js";
+import { readBody } from "../utils/request.js";
+import { HttpError } from "../middlewares/errorHandler.js";
 
 const loadUsers = async () => serializeDocs(await collections.users.get());
 const loadRequests = async () => serializeDocs(await collections.requests.get());
@@ -12,205 +13,168 @@ const sortByDateDesc = (items, field = "createdAt") =>
 
 // @route  GET /api/admin/analytics
 // @desc   Aggregated data for the Reports & Analytics charts
-export const getAnalytics = async (req, res, next) => {
-  try {
-    const [users, requests] = await Promise.all([loadUsers(), loadRequests()]);
-    // Exclude admins AND accounts that never finished their profile (e.g.
-    // a Google sign-up that never completed the follow-up step) — those
-    // have no real bloodGroup yet and would otherwise show up as a
-    // confusing "undefined" bucket in the chart.
-    const bloodGroupCounts = users
-      .filter((user) => user.role !== "admin" && user.profileComplete !== false && user.bloodGroup)
-      .reduce((accumulator, user) => {
-        accumulator[user.bloodGroup] = (accumulator[user.bloodGroup] || 0) + 1;
-        return accumulator;
-      }, {});
-    const requestStatusCounts = requests.reduce((accumulator, request) => {
-      accumulator[request.status] = (accumulator[request.status] || 0) + 1;
+export const getAnalytics = async (c) => {
+  const [users, requests] = await Promise.all([loadUsers(), loadRequests()]);
+  // Exclude admins AND accounts that never finished their profile.
+  const bloodGroupCounts = users
+    .filter((user) => user.role !== "admin" && user.profileComplete !== false && user.bloodGroup)
+    .reduce((accumulator, user) => {
+      accumulator[user.bloodGroup] = (accumulator[user.bloodGroup] || 0) + 1;
       return accumulator;
     }, {});
+  const requestStatusCounts = requests.reduce((accumulator, request) => {
+    accumulator[request.status] = (accumulator[request.status] || 0) + 1;
+    return accumulator;
+  }, {});
 
-    const bloodGroupDistribution = Object.entries(bloodGroupCounts)
-      .sort(([left], [right]) => left.localeCompare(right))
-      .map(([bloodGroup, count]) => ({ bloodGroup, count }));
-    const requestStatusBreakdown = Object.entries(requestStatusCounts).map(([status, count]) => ({ status, count }));
+  const bloodGroupDistribution = Object.entries(bloodGroupCounts)
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([bloodGroup, count]) => ({ bloodGroup, count }));
+  const requestStatusBreakdown = Object.entries(requestStatusCounts).map(([status, count]) => ({ status, count }));
 
-    res.json({ success: true, bloodGroupDistribution, requestStatusBreakdown });
-  } catch (err) {
-    next(err);
-  }
+  return c.json({ success: true, bloodGroupDistribution, requestStatusBreakdown });
 };
 
 // @route  GET /api/admin/stats
-export const getDashboardStats = async (req, res, next) => {
-  try {
-    const [users, requests, donationHistory, organizations] = await Promise.all([
-      loadUsers(),
-      loadRequests(),
-      loadDonationHistory(),
-      serializeDocs(await collections.organizations.get()),
-    ]);
+export const getDashboardStats = async (c) => {
+  const [users, requests, donationHistory, organizations] = await Promise.all([
+    loadUsers(),
+    loadRequests(),
+    loadDonationHistory(),
+    serializeDocs(await collections.organizations.get()),
+  ]);
 
-    const visibleUsers = users.filter((user) => user.role !== "admin");
-    // Only count accounts that actually finished registering — an
-    // incomplete Google sign-up (no blood group/district/phone yet) isn't
-    // a real functioning donor or seeker, so it shouldn't inflate these
-    // numbers. It's still tracked separately so admins can see/clean these up.
-    const completeUsers = visibleUsers.filter((user) => user.profileComplete !== false);
-    const incompleteProfiles = visibleUsers.length - completeUsers.length;
+  const visibleUsers = users.filter((user) => user.role !== "admin");
+  const completeUsers = visibleUsers.filter((user) => user.profileComplete !== false);
+  const incompleteProfiles = visibleUsers.length - completeUsers.length;
 
-    const totalUsers = completeUsers.length;
-    const totalDonors = completeUsers.filter((user) => user.activeMode === "donor").length;
-    const totalSeekers = completeUsers.filter((user) => user.activeMode === "seeker").length;
-    const pendingRequests = requests.filter((request) => request.status === "pending").length;
-    const completedDonations = donationHistory.length;
-    const totalOrganizations = organizations.length;
+  const stats = {
+    totalUsers: completeUsers.length,
+    totalDonors: completeUsers.filter((user) => user.activeMode === "donor").length,
+    totalSeekers: completeUsers.filter((user) => user.activeMode === "seeker").length,
+    pendingRequests: requests.filter((request) => request.status === "pending").length,
+    completedDonations: donationHistory.length,
+    totalOrganizations: organizations.length,
+    incompleteProfiles,
+  };
 
-    res.json({
-      success: true,
-      stats: {
-        totalUsers,
-        totalDonors,
-        totalSeekers,
-        pendingRequests,
-        completedDonations,
-        totalOrganizations,
-        incompleteProfiles,
-      },
-    });
-  } catch (err) {
-    next(err);
-  }
+  return c.json({ success: true, stats });
 };
 
 // @route  GET /api/admin/users?mode=donor&search=&page=1
-export const getAllUsers = async (req, res, next) => {
-  try {
-    const { mode, search, page = 1, limit = 12 } = req.query;
-    const users = (await loadUsers())
-      .filter((user) => user.role !== "admin")
-      .filter((user) => !mode || user.activeMode === mode)
-      .filter(
-        (user) =>
-          !search ||
-          [user.fullName, user.email, user.phone].some((value) => value?.toLowerCase().includes(search.toLowerCase()))
-      );
+export const getAllUsers = async (c) => {
+  const query = c.req.query();
+  const { mode, search } = query;
+  const page = Number(query.page || 1);
+  const limit = Number(query.limit || 12);
 
-    const sortedUsers = sortByDateDesc(users);
-    const total = sortedUsers.length;
-    const startIndex = (Number(page) - 1) * Number(limit);
-    const paginatedUsers = sortedUsers.slice(startIndex, startIndex + Number(limit));
+  const users = (await loadUsers())
+    .filter((user) => user.role !== "admin")
+    .filter((user) => !mode || user.activeMode === mode)
+    .filter(
+      (user) =>
+        !search ||
+        [user.fullName, user.email, user.phone].some((value) => value?.toLowerCase().includes(search.toLowerCase()))
+    );
 
-    res.json({ success: true, users: paginatedUsers, total, page: Number(page), pages: Math.ceil(total / limit) });
-  } catch (err) {
-    next(err);
-  }
+  const sortedUsers = sortByDateDesc(users);
+  const total = sortedUsers.length;
+  const startIndex = (page - 1) * limit;
+  const paginatedUsers = sortedUsers.slice(startIndex, startIndex + limit);
+
+  return c.json({
+    success: true,
+    users: paginatedUsers,
+    total,
+    page,
+    pages: Math.ceil(total / limit),
+  });
 };
 
 // @route  PATCH /api/admin/users/:id/verify
-export const toggleVerifyUser = async (req, res, next) => {
-  try {
-    const userRef = collections.users.doc(req.params.id);
-    const user = serializeDoc(await userRef.get());
-    if (!user) {
-      res.status(404);
-      throw new Error("User not found");
-    }
-    if (user.profileComplete === false) {
-      res.status(409);
-      throw new Error("This account hasn't finished registration yet — it can't be verified.");
-    }
-
-    const isVerified = !user.isVerified;
-    await userRef.update({ isVerified, updatedAt: FieldValue.serverTimestamp() });
-    if (isVerified) {
-      await notify(user.id, "verified", "আপনার প্রোফাইল অ্যাডমিন কর্তৃক ভেরিফাই করা হয়েছে।");
-    }
-    res.json({ success: true, isVerified });
-  } catch (err) {
-    next(err);
+export const toggleVerifyUser = async (c) => {
+  const userRef = collections.users.doc(c.req.param("id"));
+  const user = serializeDoc(await userRef.get());
+  if (!user) {
+    throw new HttpError(404, "User not found");
   }
+  if (user.profileComplete === false) {
+    throw new HttpError(409, "This account hasn't finished registration yet — it can't be verified.");
+  }
+
+  const isVerified = !user.isVerified;
+  await userRef.update({ isVerified, updatedAt: FieldValue.serverTimestamp() });
+  if (isVerified) {
+    await notify(user.id, "verified", "আপনার প্রোফাইল অ্যাডমিন কর্তৃক ভেরিফাই করা হয়েছে।");
+  }
+  return c.json({ success: true, isVerified });
 };
 
 // @route  DELETE /api/admin/users/:id
-export const deleteUser = async (req, res, next) => {
-  try {
-    const userRef = collections.users.doc(req.params.id);
-    const user = serializeDoc(await userRef.get());
-    if (!user) {
-      res.status(404);
-      throw new Error("User not found");
-    }
-
-    await deleteUserCascade(admin, user);
-    res.json({ success: true, message: "User deleted" });
-  } catch (err) {
-    next(err);
+export const deleteUser = async (c) => {
+  const userRef = collections.users.doc(c.req.param("id"));
+  const user = serializeDoc(await userRef.get());
+  if (!user) {
+    throw new HttpError(404, "User not found");
   }
+
+  await deleteUserCascade(user);
+  return c.json({ success: true, message: "User deleted" });
 };
 
 // @route  GET /api/admin/requests?status=pending
-export const getAllRequests = async (req, res, next) => {
-  try {
-    const requests = (await loadRequests()).filter(
-      (request) => !req.query.status || request.status === req.query.status
-    );
+export const getAllRequests = async (c) => {
+  const requests = (await loadRequests()).filter(
+    (request) => !c.req.query("status") || request.status === c.req.query("status")
+  );
 
-    res.json({ success: true, requests: sortByDateDesc(requests) });
-  } catch (err) {
-    next(err);
-  }
+  return c.json({ success: true, requests: sortByDateDesc(requests) });
 };
 
 // @route  PATCH /api/admin/requests/:id/status
-export const updateRequestStatus = async (req, res, next) => {
-  try {
-    const { status } = req.body;
-    if (!["pending", "accepted", "completed", "cancelled", "rejected"].includes(status)) {
-      res.status(400);
-      throw new Error("Invalid status");
-    }
-
-    const requestRef = collections.requests.doc(req.params.id);
-    const request = serializeDoc(await requestRef.get());
-    if (!request) {
-      res.status(404);
-      throw new Error("Request not found");
-    }
-
-    if (status === "completed" && request.acceptedDonorUid && !request.completedDonationRecorded) {
-      const historyRef = await collections.donationHistory.add({
-        donorUid: request.acceptedDonorUid,
-        donorName: request.acceptedDonorName || "",
-        bloodGroup: request.bloodGroup,
-        units: request.units,
-        hospital: request.hospital,
-        district: request.district,
-        donationDate: FieldValue.serverTimestamp(),
-        requestId: request.id,
-        createdAt: FieldValue.serverTimestamp(),
-        updatedAt: FieldValue.serverTimestamp(),
-      });
-
-      await Promise.all([
-        collections.users.doc(request.acceptedDonorUid).update({
-          lastDonationDate: FieldValue.serverTimestamp(),
-          isAvailable: false,
-          updatedAt: FieldValue.serverTimestamp(),
-        }),
-        requestRef.update({
-          status,
-          completedDonationRecorded: true,
-          completedDonationHistoryId: historyRef.id,
-          updatedAt: FieldValue.serverTimestamp(),
-        }),
-      ]);
-    } else {
-      await requestRef.update({ status, updatedAt: FieldValue.serverTimestamp() });
-    }
-
-    res.json({ success: true, request: serializeDoc(await requestRef.get()) });
-  } catch (err) {
-    next(err);
+export const updateRequestStatus = async (c) => {
+  const body = await readBody(c);
+  const { status } = body;
+  if (!["pending", "accepted", "completed", "cancelled", "rejected"].includes(status)) {
+    throw new HttpError(400, "Invalid status");
   }
+
+  const requestRef = collections.requests.doc(c.req.param("id"));
+  const request = serializeDoc(await requestRef.get());
+  if (!request) {
+    throw new HttpError(404, "Request not found");
+  }
+
+  if (status === "completed" && request.acceptedDonorUid && !request.completedDonationRecorded) {
+    const historyRef = await collections.donationHistory.add({
+      donorUid: request.acceptedDonorUid,
+      donorName: request.acceptedDonorName || "",
+      bloodGroup: request.bloodGroup,
+      units: request.units,
+      hospital: request.hospital,
+      district: request.district,
+      donationDate: FieldValue.serverTimestamp(),
+      requestId: request.id,
+      createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
+    });
+
+    await Promise.all([
+      collections.users.doc(request.acceptedDonorUid).update({
+        lastDonationDate: FieldValue.serverTimestamp(),
+        isAvailable: false,
+        updatedAt: FieldValue.serverTimestamp(),
+      }),
+      requestRef.update({
+        status,
+        completedDonationRecorded: true,
+        completedDonationHistoryId: historyRef.id,
+        updatedAt: FieldValue.serverTimestamp(),
+      }),
+    ]);
+  } else {
+    await requestRef.update({ status, updatedAt: FieldValue.serverTimestamp() });
+  }
+
+  return c.json({ success: true, request: serializeDoc(await requestRef.get()) });
 };

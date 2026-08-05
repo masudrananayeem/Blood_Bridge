@@ -1,8 +1,8 @@
-import express from "express";
+import { Hono } from "hono";
 import { protect, authorize } from "../middlewares/authMiddleware.js";
 import { createFeedback, getMyFeedback, getAllFeedback, updateFeedbackStatus } from "../controllers/feedbackController.js";
 
-const router = express.Router();
+const router = new Hono();
 
 router.use(protect);
 

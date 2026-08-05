@@ -1,42 +1,39 @@
-import jwt from "jsonwebtoken";
-import { db } from "../config/firebaseAdmin.js";
-import { serializeDoc } from "../utils/firestore.js";
+// Verifies the app's own backend JWT (issued after Firebase login sync) and
+// attaches the Firestore user document to the context as `user`.
+import { verifyAppToken } from "../utils/jwt.js";
+import { collections } from "../utils/firestore.js";
+import { HttpError } from "./errorHandler.js";
 
-// Verifies our own backend JWT (issued after Firebase login sync)
-// and attaches the Firestore user document to req.user
-export const protect = async (req, res, next) => {
+export const protect = async (c, next) => {
   try {
-    const authHeader = req.headers.authorization;
+    const authHeader = c.req.header("Authorization");
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      res.status(401);
-      throw new Error("Not authorized, no token");
+      throw new HttpError(401, "Not authorized, no token");
     }
 
     const token = authHeader.split(" ")[1];
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = await verifyAppToken(token);
 
-    const userSnap = await db.collection("users").doc(decoded.uid).get();
-    const user = serializeDoc(userSnap);
-    if (!user) {
-      res.status(401);
-      throw new Error("Not authorized, user not found");
+    const userSnap = await collections.users.doc(decoded.uid).get();
+    if (!userSnap.exists) {
+      throw new HttpError(401, "Not authorized, user not found");
     }
 
-    req.user = user;
-    next();
+    c.set("user", { id: userSnap.id, ...userSnap.data() });
+    await next();
   } catch (err) {
-    res.status(401);
-    next(new Error("Not authorized, token invalid or expired"));
+    if (err instanceof HttpError) throw err;
+    throw new HttpError(401, "Not authorized, token invalid or expired");
   }
 };
 
 // Restricts a route to specific role(s), e.g. authorize("admin")
-export const authorize =
-  (...roles) =>
-    (req, res, next) => {
-      if (!roles.includes(req.user.role)) {
-        res.status(403);
-        return next(new Error("Forbidden — insufficient permissions"));
-      }
-      next();
-    };
+export const authorize = (...roles) => async (c, next) => {
+  const user = c.get("user");
+  if (!roles.includes(user.role)) {
+    throw new HttpError(403, "Forbidden — insufficient permissions");
+  }
+  await next();
+};
+
+export default { protect, authorize };

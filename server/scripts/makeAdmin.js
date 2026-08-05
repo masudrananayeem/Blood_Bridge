@@ -18,7 +18,8 @@
  * since it talks to Firestore directly.
  */
 import "dotenv/config";
-import admin, { db } from "../config/firebaseAdmin.js";
+import { db, FieldValue } from "../utils/firestore.js";
+import { getServiceAccount } from "../config/serviceAccount.js";
 
 const email = process.argv[2];
 
@@ -27,8 +28,8 @@ if (!email) {
   process.exit(1);
 }
 
-if (!db) {
-  console.error("Firebase Admin isn't initialized — check FIREBASE_SERVICE_ACCOUNT_BASE64 in server/.env");
+if (!getServiceAccount()) {
+  console.error("Firebase isn't configured — check FIREBASE_SERVICE_ACCOUNT_BASE64 in server/.env");
   process.exit(1);
 }
 
@@ -42,7 +43,7 @@ const run = async () => {
   }
 
   const userDoc = snapshot.docs[0];
-  await userDoc.ref.update({ role: "admin", updatedAt: admin.firestore.FieldValue.serverTimestamp() });
+  await db.collection("users").doc(userDoc.id).update({ role: "admin", updatedAt: FieldValue.serverTimestamp() });
 
   console.log(`✅ ${email} is now an admin. Log in (or refresh) on the site — you'll land in /admin.`);
   process.exit(0);

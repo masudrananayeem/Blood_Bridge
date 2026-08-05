@@ -17,13 +17,15 @@
  *   node scripts/cleanupOrphanedUsers.js --apply   # actually deletes them
  */
 import "dotenv/config";
-import admin, { db } from "../config/firebaseAdmin.js";
+import { db } from "../utils/firestore.js";
+import { getUserByUid } from "../utils/auth.js";
 import { deleteUserCascade } from "../utils/deleteUserData.js";
+import { getServiceAccount } from "../config/serviceAccount.js";
 
 const apply = process.argv.includes("--apply");
 
-if (!db) {
-  console.error("Firebase Admin isn't initialized — check FIREBASE_SERVICE_ACCOUNT_BASE64 in server/.env");
+if (!getServiceAccount()) {
+  console.error("Firebase isn't configured — check FIREBASE_SERVICE_ACCOUNT_BASE64 in server/.env");
   process.exit(1);
 }
 
@@ -42,14 +44,13 @@ const run = async () => {
       continue;
     }
 
-    try {
-      await admin.auth().getUser(user.firebaseUid);
-    } catch (err) {
-      if (err.code === "auth/user-not-found") {
-        ghosts.push({ user, reason: "no matching Firebase Auth account" });
-      } else {
-        console.warn(`  ! Couldn't verify ${user.email || user.id}: ${err.message}`);
-      }
+    const authUser = await getUserByUid(user.firebaseUid).catch((err) => {
+      console.warn(`  ! Couldn't verify ${user.email || user.id}: ${err.message}`);
+      return undefined;
+    });
+
+    if (authUser === null) {
+      ghosts.push({ user, reason: "no matching Firebase Auth account" });
     }
   }
 
@@ -70,7 +71,7 @@ const run = async () => {
 
   console.log("\nDeleting...");
   for (const { user } of ghosts) {
-    await deleteUserCascade(admin, user);
+    await deleteUserCascade(user);
     console.log(`  ✓ removed ${user.email || user.id}`);
   }
   console.log(`\n✅ Removed ${ghosts.length} ghost profile(s).`);

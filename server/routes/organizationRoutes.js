@@ -1,4 +1,4 @@
-import express from "express";
+import { Hono } from "hono";
 import { protect, authorize } from "../middlewares/authMiddleware.js";
 import {
   getOrganizations,
@@ -9,7 +9,7 @@ import {
   deleteOrganization,
 } from "../controllers/organizationController.js";
 
-const router = express.Router();
+const router = new Hono();
 
 router.use(protect); // any logged-in donor/seeker/admin can browse
 

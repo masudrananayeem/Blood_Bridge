@@ -21,9 +21,13 @@ A full-stack blood donation management platform that connects blood donors with 
 
 **Frontend:** React (Vite), Tailwind CSS, Framer Motion, React Router DOM, Axios, React Hook Form, React Hot Toast, React Icons, Firebase Auth SDK
 
-**Backend:** Node.js, Express.js, Firebase Admin SDK + Firestore, JWT, Cloudinary, express-validator, express-rate-limit, Helmet
+**Backend:** Hono (Web-standard HTTP, runs on Node **and** Cloudflare Workers), @hono/node-server (Node host), jose + WebCrypto (JWT), Firestore REST + Firebase Auth REST (no firebase-admin SDK needed), Cloudinary REST
 
-**Hosting:** Frontend → Vercel · Backend → Render · Database → Firebase Firestore · Images → Cloudinary
+**Hosting:** Frontend → Vercel · Backend → Render (Node) **or** Cloudflare Workers (same code) · Database → Firebase Firestore · Images → Cloudinary
+
+> The backend is a single Hono app with two thin entry points — `server.js`
+> (`@hono/node-server` for Node/Render) and `worker.js` (Cloudflare Workers).
+> Routes, controllers, and data access are shared; nothing is duplicated.
 
 ---
 
@@ -53,12 +57,17 @@ bloodbridge/
 │       ├── config/                 # firebase.js
 │       └── utils/                  # districts.js, bloodGroups.js
 │
-├── server/                      # Node + Express backend
-│   ├── controllers/             # auth, user, request, admin, notification
-│   ├── routes/                  # one router per domain
-│   ├── middlewares/             # auth, validators, error handler
-│   ├── config/                  # firebaseAdmin.js
-│   └── utils/                   # firestore.js, generateToken.js, notify.js
+├── server/                      # Hono backend (Node + Cloudflare Workers)
+│   ├── app.js                   # single Hono app shared by both entry points
+│   ├── server.js                # Node entry (@hono/node-server) — npm start
+│   ├── worker.js                # Cloudflare Workers entry — npx wrangler deploy
+│   ├── wrangler.toml            # Cloudflare Workers config
+│   ├── controllers/             # auth, user, request, admin, notification, organization, feedback
+│   ├── routes/                  # one Hono router per domain
+│   ├── middlewares/             # auth, validators, rate limit, security headers, error handler
+│   ├── config/                  # env + service-account access (runtime-agnostic)
+│   ├── utils/                   # firestore REST client, auth REST, jwt, notify, cloudinary, districtCoords
+│   └── scripts/                 # admin/cleanup CLI helpers (Node only)
 │
 └── .gitignore
 ```
@@ -167,6 +176,43 @@ All routes except `/auth/register` and `/auth/login` require `Authorization: Bea
 5. Update `CLIENT_URL` to your deployed Vercel URL, and update the frontend's `VITE_API_URL` to your Render URL
 
 **Database:** Firebase Firestore — create the required collections in your Firebase project.
+
+### ☁️ Cloudflare Workers (alternative backend host)
+
+The **exact same code** runs on Cloudflare Workers — no fork, no rewrite. From `server/`:
+
+```bash
+cd server
+npm install
+npx wrangler login
+```
+
+Set the secrets (never put secrets in `wrangler.toml`):
+
+```bash
+npx wrangler secret put FIREBASE_SERVICE_ACCOUNT_BASE64   # paste value when prompted
+npx wrangler secret put JWT_SECRET
+npx wrangler secret put CLOUDINARY_CLOUD_NAME
+npx wrangler secret put CLOUDINARY_API_KEY
+npx wrangler secret put CLOUDINARY_API_SECRET
+```
+
+Then deploy:
+
+```bash
+npx wrangler deploy
+```
+
+Notes:
+- Edit `server/wrangler.toml` → `[vars]` → set `CLIENT_URL` to your frontend and a
+  `compatibility_date`. Entry is `worker.js` (already set).
+- To get durable, cross-edge rate limiting, create a KV namespace
+  (`npx wrangler kv namespace create RATE_LIMITER`) and uncomment the
+  `[[kv_namespaces]]` block in `wrangler.toml`. Without KV, the limiter uses an
+  in-process counter (fine for Node and small-scale Workers).
+- The Firestore/Auth client talks to Google over HTTPS REST (OAuth2 service-account
+  tokens), so it needs no extra bindings — just the service-account secret above.
+- Local `npm run dev` / `npm start` behaviour is unchanged (same routes, same port).
 
 ---
 
